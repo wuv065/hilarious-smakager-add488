@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ระบบใบเงินเดือนพลทหารกองประจำการ</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+@font-face {
+  font-family: 'TH Sarabun PSK';
+  src: url('https://db.onlinewebfonts.com/t/34b4b2b921f3f8a8b85a5c35d23f8e22.woff2') format('woff2'),
+       url('https://db.onlinewebfonts.com/t/34b4b2b921f3f8a8b85a5c35d23f8e22.woff') format('woff');
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'TH Sarabun PSK','Sarabun',sans-serif;background:#e8e8e4;color:#222;font-size:15px;}
+.topbar{background:#1a4f8a;color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.topbar h1{font-size:17px;font-weight:700;}
+.topbar p{font-size:12px;opacity:.8;margin-top:2px;}
+.topbar-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.container{max-width:1180px;margin:0 auto;padding:20px 14px;}
+.panel{background:#fff;border-radius:10px;border:1px solid #ccc;padding:16px;margin-bottom:14px;}
+.controls{display:grid;grid-template-columns:1fr 1fr auto auto;gap:10px;align-items:end;}
+.field label{font-size:12px;color:#666;display:block;margin-bottom:4px;}
+select,input[type=text]{width:100%;padding:7px 10px;border:1px solid #bbb;border-radius:7px;font-family:'TH Sarabun PSK','Sarabun',sans-serif;font-size:14px;background:#fff;}
+select:focus,input:focus{outline:2px solid #1a4f8a;border-color:#1a4f8a;}
+.btn{padding:7px 16px;border-radius:7px;font-family:'TH Sarabun PSK','Sarabun',sans-serif;font-size:14px;cursor:pointer;border:1px solid #bbb;background:#f4f4f0;color:#333;white-space:nowrap;}
+.btn:hover{background:#e8e8e4;}
+.btn-primary{background:#1a4f8a;color:#fff;border-color:#1a4f8a;}
+.btn-primary:hover{background:#0d3d73;}
+.btn-green{background:#3B6D11;color:#fff;border-color:#3B6D11;}
+.btn-green:hover{background:#2a4f0c;}
+.btn-orange{background:#b85c00;color:#fff;border-color:#b85c00;}
+.btn-orange:hover{background:#944900;}
+.btn-sm{padding:5px 12px;font-size:13px;}
+.import-area{border:2px dashed #bbb;border-radius:8px;padding:14px 20px;text-align:center;cursor:pointer;color:#888;font-size:14px;transition:border-color .2s,background .2s;}
+.import-area:hover,.import-area.drag{border-color:#1a4f8a;background:#eef3fa;color:#1a4f8a;}
+.total-bar{display:flex;gap:20px;flex-wrap:wrap;padding:10px 14px;background:#eef3fa;border-radius:8px;margin-bottom:12px;border:1px solid #c5d8f0;}
+.total-item small{color:#666;font-size:11px;display:block;}
+.total-item span{font-weight:700;font-size:15px;color:#1a4f8a;}
+.table-wrap{background:#fff;border-radius:10px;border:1px solid #ccc;overflow:auto;margin-bottom:14px;}
+table.main{width:100%;border-collapse:collapse;font-size:13.5px;}
+table.main th{background:#f0f0eb;padding:9px 10px;text-align:left;font-weight:700;color:#444;border-bottom:1.5px solid #bbb;white-space:nowrap;position:sticky;top:0;}
+table.main td{padding:8px 10px;border-bottom:1px solid #eee;vertical-align:middle;}
+table.main tr:last-child td{border-bottom:none;}
+table.main tr:hover td{background:#f5f8fd;}
+.num{text-align:right;font-variant-numeric:tabular-nums;}
+.badge{font-size:11px;padding:2px 7px;border-radius:20px;font-weight:600;}
+.badge-blue{background:#ddeaf7;color:#0d3d73;}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:#fff;border-radius:12px;width:min(96vw,760px);max-height:92vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.25);}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid #ddd;position:sticky;top:0;background:#fff;z-index:10;}
+.modal-body{padding:18px;}
+
+/* ===== PAYSLIP ===== */
+.slip-outer{font-family:'TH Sarabun PSK','Sarabun',sans-serif;width:100%;max-width:640px;margin:0 auto;}
+.slip{width:100%;border-collapse:collapse;border:1.5px solid #333;font-size:13.5px;}
+.slip td,.slip th{border:1px solid #666;padding:4px 8px;vertical-align:middle;}
+.no-border{border:none !important;}
+.slip-title-row td{border:none;padding:5px 8px 0;}
+.slip-month-row td{border:none;padding:1px 8px 4px;}
+.hdr-th{background:#e0e0e0;font-weight:700;text-align:center;font-size:13px;}
+.section-td{background:#f0f0ec;font-weight:700;font-size:13.5px;padding:4px 8px;}
+.sub-td{background:#f8f8f5;font-size:12px;text-align:center;color:#333;padding:4px 6px;}
+.data-td{text-align:right;padding:4px 10px;}
+.data-center{text-align:center;padding:4px 8px;}
+
+@media print{
+  body{background:#fff;}
+  .no-print{display:none!important;}
+  .slip-page{page-break-after:always;}
+  .slip-page:last-child{page-break-after:auto;}
+  .slip-outer{max-width:100%;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar no-print">
+  <div>
+    <h1>📋 ระบบใบเงินเดือนพลทหารกองประจำการ</h1>
+    <p id="topbarSub">กำลังโหลดข้อมูล...</p>
+  </div>
+  <div class="topbar-right">
+    <button class="btn" onclick="showGithubSettings()" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3);font-size:13px;" title="ตั้งค่า GitHub Sync">⚙️ GitHub</button>
+    <button class="btn" id="syncBtn" onclick="syncToGithub()" style="background:rgba(40,167,69,.8);color:#fff;border-color:rgba(40,167,69,.9);font-size:13px;">☁️ Sync</button>
+    <button class="btn" onclick="exportData()" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3);font-size:13px;">💾 Export</button>
+    <label class="btn" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3);font-size:13px;cursor:pointer;">📥 Import<input type="file" accept=".json" onchange="importData(this)" style="display:none;"></label>
+    <button class="btn" onclick="if(confirm('ล้างข้อมูลที่เซฟทั้งหมดออกจากเครื่อง?'))clearStorage();" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3);font-size:13px;">🗑️ ล้างข้อมูล</button>
+    <label class="btn btn-orange" style="cursor:pointer;">
+      📂 Import Excel
+      <input type="file" id="fileInputTop" accept=".xlsx,.xls" style="display:none;" onchange="handleFile(this)">
+    </label>
+    <button class="btn btn-green" onclick="printSelected()">🖨️ พิมพ์ที่เลือก</button>
+    <button class="btn btn-primary" onclick="printAll()">📄 พิมพ์ทั้งหมด</button>
+  </div>
+</div>
+
+<div id="tabBar" style="background:#0d3d73;border-top:1px solid rgba(255,255,255,.15);display:none;">
+  <div style="max-width:1180px;margin:0 auto;padding:0 14px;display:flex;align-items:center;gap:0;">
+    <button onclick="goHome()" style="padding:10px 16px;font-family:'TH Sarabun PSK','Sarabun',sans-serif;font-size:14px;border:none;cursor:pointer;background:transparent;color:rgba(255,255,255,.8);border-bottom:3px solid transparent;">← หน้าหลัก</button>
+    <div style="width:1px;height:20px;background:rgba(255,255,255,.2);margin:0 4px;"></div>
+    <button id="tabSalary" onclick="switchTab('salary')" style="padding:10px 24px;font-family:'TH Sarabun PSK','Sarabun',sans-serif;font-size:15px;border:none;cursor:pointer;background:transparent;color:rgba(255,255,255,.7);font-weight:400;border-bottom:3px solid transparent;">💰 เงินเดือน</button>
+    <button id="tabBia" onclick="switchTab('bia')" style="padding:10px 24px;font-family:'TH Sarabun PSK','Sarabun',sans-serif;font-size:15px;border:none;cursor:pointer;background:transparent;color:rgba(255,255,255,.7);font-weight:400;border-bottom:3px solid transparent;">🍽️ เบี้ยเลี้ยง</button>
+  </div>
+</div>
+<!-- ===== LANDING PAGE ===== -->
+<div id="landingPage" style="max-width:900px;margin:60px auto;padding:20px 16px;">
+  <div style="text-align:center;margin-bottom:48px;">
+    <div style="font-size:22px;font-weight:700;color:#1a4f8a;margin-bottom:8px;">พัน.ช.คมศ.พล.ช.</div>
+    <div style="font-size:15px;color:#888;">เลือกระบบที่ต้องการใช้งาน</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:600px;margin:0 auto;">
+    <!-- เงินเดือน -->
+    <div onclick="switchTab('salary')" style="background:#fff;border-radius:16px;border:2px solid #c5d8f0;padding:40px 24px;text-align:center;cursor:pointer;transition:all .2s;box-shadow:0 2px 12px rgba(0,0,0,.06);"
+      onmouseover="this.style.borderColor='#1a4f8a';this.style.boxShadow='0 4px 24px rgba(26,79,138,.15)';this.style.transform='translateY(-2px)'"
+      onmouseout="this.style.borderColor='#c5d8f0';this.style.boxShadow='0 2px 12px rgba(0,0,0,.06)';this.style.transform='translateY(0)'">
+      <div style="font-size:52px;margin-bottom:16px;">💰</div>
+      <div style="font-size:20px;font-weight:700;color:#1a4f8a;margin-bottom:8px;">เงินเดือน</div>
+      <div style="font-size:13px;color:#888;line-height:1.6;">จัดการและพิมพ์<br>ใบเงินเดือนพลทหาร</div>
+    </div>
+    <!-- เบี้ยเลี้ยง -->
+    <div onclick="switchTab('bia')" style="background:#fff;border-radius:16px;border:2px solid #c5d8f0;padding:40px 24px;text-align:center;cursor:pointer;transition:all .2s;box-shadow:0 2px 12px rgba(0,0,0,.06);"
+      onmouseover="this.style.borderColor='#3B6D11';this.style.boxShadow='0 4px 24px rgba(59,109,17,.15)';this.style.transform='translateY(-2px)'"
+      onmouseout="this.style.borderColor='#c5d8f0';this.style.boxShadow='0 2px 12px rgba(0,0,0,.06)';this.style.transform='translateY(0)'">
+      <div style="font-size:52px;margin-bottom:16px;">🍽️</div>
+      <div style="font-size:20px;font-weight:700;color:#3B6D11;margin-bottom:8px;">เบี้ยเลี้ยง</div>
+      <div style="font-size:13px;color:#888;line-height:1.6;">คำนวณและ Export<br>ยอดโอนเบี้ยเลี้ยง</div>
+    </div>
+  </div>
+</div>
+
+<div class="container" id="salarySection" style="display:none;">
+
+<div id="importPanel" class="panel">
+  <p style="font-size:13px;color:#555;margin-bottom:10px;font-weight:600;">📌 โหลดข้อมูลจากไฟล์ Excel หรือใช้ข้อมูลตัวอย่าง</p>
+  <div class="import-area" id="dropZone" onclick="document.getElementById('fileInput2').click()">
+    <input type="file" id="fileInput2" accept=".xlsx,.xls" onchange="handleFile(this)" style="display:none;">
+    <div style="font-size:28px;margin-bottom:6px;">📥</div>
+    <div>ลากไฟล์ Excel มาวาง หรือคลิกเพื่อเลือกไฟล์</div>
+    <div style="font-size:12px;margin-top:4px;">รองรับ .xlsx, .xls — ชีต: ร้อย.บก., ร้อย.1, ร้อย.2, ร้อย.คม., ทหารใหม่</div>
+  </div>
+  <div style="text-align:center;margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;">
+    <button class="btn btn-primary" onclick="loadBuiltIn()">📋 ใช้ข้อมูลพฤษภาคม 2569 (ตัวอย่าง)</button>
+    <span id="importStatus" style="font-size:13px;color:#888;"></span>
+  </div>
+  <div style="margin-top:10px;padding:10px 14px;background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;font-size:13px;color:#7c5800;">
+    💡 <strong>วิธีใช้:</strong>
+    📂 อัพโหลดไฟล์ Excel — ระบบจะอ่านเดือนจากช่อง AH อัตโนมัติ รองรับหลายเดือน หลายกองร้อยในไฟล์เดียว
+  </div>
+</div>
+
+<div id="mainUI" style="display:none;">
+  <div id="monthTabs" class="no-print" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;"></div>
+  <div class="panel no-print">
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #eee;">
+      <div class="field"><label>เดือน</label>
+        <select id="cfgMonth">
+          <option>มกราคม</option><option>กุมภาพันธ์</option><option>มีนาคม</option><option>เมษายน</option>
+          <option selected>พฤษภาคม</option><option>มิถุนายน</option><option>กรกฎาคม</option><option>สิงหาคม</option>
+          <option>กันยายน</option><option>ตุลาคม</option><option>พฤศจิกายน</option><option>ธันวาคม</option>
+        </select>
+      </div>
+      <div class="field"><label>ปี (พ.ศ.)</label><input type="text" id="cfgYear" value="2569" style="width:80px;"></div>
+      <div class="field"><label>วันที่จ่ายเงิน</label><input type="text" id="cfgPayDate" value="9 มิ.ย. 69" style="width:120px;"></div>
+      <div class="field"><label>ชื่อ ร.ท.</label><input type="text" id="cfgOfficer" value="ภาณุพงศ์ แก้วช่วย" style="width:190px;"></div>
+      <div class="field"><label>เบี้ยเลี้ยง (บ./วัน)</label><input type="text" id="cfgDailyRate" value="96" style="width:70px;"></div>
+      <div class="field"><label>หักค่าประกอบ (บ./วัน)</label><input type="text" id="cfgDailyDeduct" value="70" style="width:70px;"></div>
+      <div class="field"><label>จำนวนวัน</label><input type="text" id="cfgDays" value="31" style="width:65px;"></div>
+    </div>
+    <div class="controls">
+      <div class="field"><label>กรองหน่วย</label>
+        <select id="unitFilter"><option value="all">— ทั้งหมด —</option></select>
+      </div>
+      <div class="field"><label>ค้นหาชื่อ / เลขบัตร</label>
+        <input type="text" id="searchInput" placeholder="พิมพ์ชื่อ นามสกุล หรือเลขประจำตัว...">
+      </div>
+      <div class="field"><label>&nbsp;</label><button class="btn btn-primary" onclick="selectAll()">☑ เลือกทั้งหมด</button></div>
+      <div class="field"><label>&nbsp;</label><button class="btn" onclick="clearAll()">✕ ล้าง</button></div>
+      <div class="field"><label>&nbsp;</label>
+        <label class="btn btn-orange" style="cursor:pointer;">📂 Import Excel
+          <input type="file" accept=".xlsx,.xls" onchange="handleFile(this)" style="display:none;">
+        </label>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="totalBar" class="total-bar no-print" style="display:none;"></div>
+  <div id="summaryPanel" class="no-print" style="display:none;background:#fff;border-radius:10px;border:1px solid #c5d8f0;margin-bottom:14px;overflow:hidden;"></div>
+
+  <div class="table-wrap no-print">
+    <table class="main">
+      <thead><tr>
+        <th style="width:38px;text-align:center;"><input type="checkbox" id="masterCheck" onchange="toggleAll(this.checked)" style="width:15px;height:15px;cursor:pointer;"></th>
+        <th style="width:38px;">#</th>
+        <th style="min-width:170px;">ชื่อ-สกุล</th>
+        <th style="width:90px;">หน่วย</th>
+        <th style="width:75px;">ระดับ/ขั้น</th>
+        <th class="num" style="width:90px;">เงินเดือน</th>
+        <th class="num" style="width:90px;">พชค.</th>
+        <th class="num" style="width:85px;">หัก</th>
+        <th class="num" style="width:95px;">รับสุทธิ</th>
+        <th style="width:70px;"></th>
+      </tr></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="actions no-print">
+    <button class="btn btn-green" onclick="printSelected()">🖨️ พิมพ์ที่เลือก</button>
+    <button class="btn btn-primary" onclick="printAll()">📄 พิมพ์ทั้งหมดในหน้า</button>
+    <button class="btn" onclick="printByUnit()" style="background:#5c3d8f;color:#fff;border-color:#5c3d8f;">📋 พิมพ์แยกกองร้อย</button>
+    <button class="btn" onclick="exportSalaryExcel()" style="background:#0f766e;color:#fff;border-color:#0f766e;">📥 Export Excel</button>
+    <span id="selectedCount" style="font-size:13px;color:#555;"></span>
+  </div>
+</div>
+</div>
+
+<!-- Modal -->
+</div><!-- /salarySection -->
+
+<!-- ===== SECTION เบี้ยเลี้ยง ===== -->
+<div id="biaSection" style="display:none;max-width:1180px;margin:0 auto;padding:20px 14px;">
+  <div style="background:#fff;border-radius:10px;border:1px solid #ccc;padding:16px;margin-bottom:14px;" class="no-print">
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+      <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">เดือน</label>
+        <select id="biaMonthSel" style="padding:7px 10px;border:1px solid #bbb;border-radius:7px;font-family:'TH Sarabun PSK','Sarabun',sans-serif;font-size:14px;" onchange="loadBiaData()">
+          <option value="">— เลือกเดือน —</option>
+        </select>
+      </div>
+      <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">งวด</label>
+        <select id="biaPeriodSel" style="padding:7px 10px;border:1px solid #bbb;border-radius:7px;font-family:'TH Sarabun PSK','Sarabun',sans-serif;font-size:14px;" onchange="onPeriodChange()">
+          <option value="1">งวด 1 (1-10)</option>
+          <option value="2">งวด 2 (11-20)</option>
+          <option value="3">งวด 3 (21-สิ้นเดือน)</option>
+        </select>
+      </div>
+      <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">อัตราเบิก (บ./วัน)</label>
+        <input id="biaRate" type="number" value="96" style="width:80px;padding:7px 10px;border:1px solid #bbb;border-radius:7px;font-size:14px;" onchange="recalcBia()">
+      </div>
+      <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">หักค่าประกอบ (บ./วัน)</label>
+        <input id="biaDeductRate" type="number" value="70" style="width:80px;padding:7px 10px;border:1px solid #bbb;border-radius:7px;font-size:14px;" onchange="recalcBia()">
+      </div>
+      <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">วันตั้งต้น</label>
+        <input id="biaDaysDefault" type="number" value="10" readonly style="width:70px;padding:7px 10px;border:1px solid #bbb;border-radius:7px;font-size:14px;background:#f8f8f5;cursor:default;" title="คำนวณอัตโนมัติตามเดือน" style="width:70px;padding:7px 10px;border:1px solid #bbb;border-radius:7px;font-size:14px;">
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-top:10px;border-top:1px solid #eee;margin-top:10px;">
+      <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">กรองกองร้อย</label>
+        <select id="biaUnitFilter" style="padding:7px 10px;border:1px solid #bbb;border-radius:7px;font-family:'TH Sarabun PSK','Sarabun',sans-serif;font-size:14px;" onchange="loadBiaData()">
+          <option value="all">— ทั้งหมด —</option>
+        </select>
+      </div>
+    </div>
+    <div id="biaSummary" style="display:flex;gap:20px;flex-wrap:wrap;padding:10px 14px;background:#eef3fa;border-radius:8px;border:1px solid #c5d8f0;font-size:13.5px;margin-top:10px;"></div>
+  </div>
+  <div style="background:#fff;border-radius:10px;border:1px solid #ccc;overflow:auto;margin-bottom:14px;">
+    <table style="width:100%;border-collapse:collapse;font-size:13.5px;">
+      <thead>
+        <tr style="background:#f0f0eb;">
+          <th style="padding:9px 10px;text-align:left;border-bottom:1.5px solid #bbb;width:35px;">#</th>
+          <th style="padding:9px 10px;text-align:left;border-bottom:1.5px solid #bbb;min-width:150px;">ชื่อ-สกุล</th>
+          <th style="padding:9px 10px;text-align:left;border-bottom:1.5px solid #bbb;width:85px;">หน่วย</th>
+          <th style="padding:9px 10px;text-align:center;border-bottom:1.5px solid #bbb;width:72px;">วันเบิก</th>
+          <th style="padding:9px 10px;text-align:right;border-bottom:1.5px solid #bbb;width:88px;">ยอดเบิก</th>
+          <th style="padding:9px 10px;text-align:center;border-bottom:1.5px solid #bbb;width:80px;">วันหักอาหาร</th>
+          <th style="padding:9px 10px;text-align:right;border-bottom:1.5px solid #bbb;width:90px;">หักค่าประกอบ</th>
+          <th style="padding:9px 10px;text-align:right;border-bottom:1.5px solid #bbb;width:88px;">หักอื่นๆ</th>
+          <th style="padding:9px 10px;text-align:right;border-bottom:1.5px solid #bbb;width:98px;color:#1a4f8a;">ยอดโอนทหาร</th>
+        </tr>
+      </thead>
+      <tbody id="biaBody"></tbody>
+    </table>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;" class="no-print">
+    <button onclick="exportBiaExcel(1)" style="padding:8px 18px;border-radius:7px;font-family:'TH Sarabun PSK','Sarabun',sans-serif;font-size:14px;cursor:pointer;background:#3B6D11;color:#fff;border:none;">📥 Export โอนทหาร (.xlsx)</button>
+    <button onclick="exportBiaExcel(2)" style="padding:8px 18px;border-radius:7px;font-family:'TH Sarabun PSK','Sarabun',sans-serif;font-size:14px;cursor:pointer;background:#1a4f8a;color:#fff;border:none;">📥 Export โอนค่าประกอบ (.xlsx)</button>
+  </div>
+</div>
+
+<div class="modal-bg no-print" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <strong id="modalTitle" style="font-size:15px;">ใบเงินเดือน</strong>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-green btn-sm" onclick="doPrint()">🖨️ พิมพ์</button>
+        <button class="btn btn-sm" onclick="closeModal()">✕ ปิด</button>
+      </div>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// unitFull อยู่ใน s.unitFull แล้ว
+let monthsData = {};
+let activeYYYYMM = null;
+let soldiers = [];
+let units = [];
+let selected = new Set();
+
+// LocalStorage helpers
+const LS_KEY = 'payslip_data';
+function exportData(){
+  try{
+    const data = JSON.stringify({monthsData, activeYYYYMM}, null, 2);
+    const blob = new Blob([data], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const date = new Date().toISOString().slice(0,10).replace(/-/g,'');
+    a.href = url;
+    a.download = 'payslip_backup_'+date+'.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }catch(e){ alert('Export ไม่สำเร็จ: '+e.message); }
+}
+
+function importData(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const parsed = JSON.parse(e.target.result);
+      if(!parsed.monthsData) throw new Error('ไฟล์ไม่ถูกต้อง');
+      if(!confirm('นำเข้าข้อมูล '+Object.keys(parsed.monthsData).length+' เดือน? ข้อมูลเดิมจะถูกแทนที่')) return;
+      monthsData = parsed.monthsData;
+      saveToStorage();
+      const ym = parsed.activeYYYYMM || Object.keys(monthsData).sort().pop();
+      setActiveMonth(ym, false);
+      renderMonthSelect();
+      document.getElementById('importStatus').textContent = '✅ Import ข้อมูลสำเร็จ';
+    }catch(err){
+      alert('อ่านไฟล์ไม่สำเร็จ: '+err.message);
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+/* ===== GITHUB SYNC ===== */
+const GH_KEY = 'gh_config';
+
+function getGhConfig(){
+  try{ return JSON.parse(localStorage.getItem(GH_KEY))||{}; }catch(e){ return {}; }
+}
+function saveGhConfig(cfg){
+  localStorage.setItem(GH_KEY, JSON.stringify(cfg));
+}
+
+function showGithubSettings(){
+  const cfg = getGhConfig();
+  document.getElementById('modalTitle').textContent = '⚙️ ตั้งค่า GitHub Sync';
+  document.getElementById('modalBody').innerHTML = `
+    <div style="font-size:13px;color:#666;margin-bottom:14px;padding:10px;background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;">
+      🔒 Token เก็บในเครื่องคุณเท่านั้น ไม่ได้ส่งออกไปไหนนอกจาก GitHub
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;">
+      <div>
+        <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">GitHub Token (ghp_...)</label>
+        <input id="gh_token" type="password" value="${cfg.token||''}" placeholder="ghp_xxxxxxxxxxxx"
+          style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:7px;font-family:monospace;font-size:13px;">
+      </div>
+      <div>
+        <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">GitHub Username</label>
+        <input id="gh_user" value="${cfg.user||''}" placeholder="เช่น wuv065"
+          style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:7px;font-size:14px;">
+      </div>
+      <div>
+        <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">Repository Name</label>
+        <input id="gh_repo" value="${cfg.repo||''}" placeholder="เช่น Payslip"
+          style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:7px;font-size:14px;">
+      </div>
+      <div>
+        <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">ชื่อไฟล์ข้อมูล</label>
+        <input id="gh_file" value="${cfg.file||'payslip_data.json'}" placeholder="payslip_data.json"
+          style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:7px;font-size:14px;">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;flex-wrap:wrap;">
+      <button class="btn" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn" onclick="testGhConnection()" style="background:#f0f5ff;color:#1a4f8a;border-color:#b3ccf0;">🔍 ทดสอบ</button>
+      <button class="btn btn-primary" onclick="saveGhSettings()">💾 บันทึก</button>
+    </div>
+    <div id="gh_test_result" style="margin-top:10px;font-size:13px;"></div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function saveGhSettings(){
+  const cfg = {
+    token: document.getElementById('gh_token').value.trim(),
+    user:  document.getElementById('gh_user').value.trim(),
+    repo:  document.getElementById('gh_repo').value.trim(),
+    file:  document.getElementById('gh_file').value.trim()||'payslip_data.json',
+  };
+  if(!cfg.token||!cfg.user||!cfg.repo){ alert('กรุณากรอกข้อมูลให้ครบ'); return; }
+  saveGhConfig(cfg);
+  closeModal();
+  updateSyncBtn();
+  alert('✅ บันทึกแล้ว กด ☁️ Sync เพื่ออัพโหลดข้อมูลขึ้น GitHub');
+}
+
+async function testGhConnection(){
+  const cfg = {
+    token: document.getElementById('gh_token').value.trim(),
+    user:  document.getElementById('gh_user').value.trim(),
+    repo:  document.getElementById('gh_repo').value.trim(),
+  };
+  const res = document.getElementById('gh_test_result');
+  res.textContent = '🔄 กำลังทดสอบ...';
+  try{
+    const r = await fetch(`https://api.github.com/repos/${cfg.user}/${cfg.repo}`,{
+      headers:{'Authorization':'token '+cfg.token,'Accept':'application/vnd.github.v3+json'}
+    });
+    if(r.ok){ res.style.color='#3B6D11'; res.textContent='✅ เชื่อมต่อสำเร็จ! Repository พร้อมใช้งาน'; }
+    else{ res.style.color='#8b2000'; res.textContent='❌ ไม่สำเร็จ ('+r.status+') ตรวจสอบ Token และ Repo อีกครั้ง'; }
+  }catch(e){ res.style.color='#8b2000'; res.textContent='❌ Error: '+e.message; }
+}
+
+async function syncToGithub(silent=false){
+  const cfg = getGhConfig();
+  if(!cfg.token||!cfg.user||!cfg.repo){ if(!silent)showGithubSettings(); return; }
+  const btn = document.getElementById('syncBtn');
+  if(btn){ btn.textContent='⏳ Syncing...'; btn.disabled=true; }
+  try{
+    const data = JSON.stringify({monthsData, activeYYYYMM}, null, 2);
+    // ใช้ loop แทน spread เพื่อป้องกัน call stack overflow กับข้อมูลขนาดใหญ่
+    const enc = new TextEncoder().encode(data);
+    let binary = '';
+    for(let i=0;i<enc.length;i++) binary+=String.fromCharCode(enc[i]);
+    const b64 = btoa(binary);
+    // ดึง SHA ของไฟล์เดิม (ถ้ามี)
+    let sha = '';
+    const getR = await fetch(`https://api.github.com/repos/${cfg.user}/${cfg.repo}/contents/${cfg.file}`,{
+      headers:{'Authorization':'token '+cfg.token,'Accept':'application/vnd.github.v3+json'}
+    });
+    if(getR.ok){ const j=await getR.json(); sha=j.sha||''; }
+    // อัพโหลด
+    const body = {message:'Update payslip data '+new Date().toLocaleDateString('th-TH'), content:b64};
+    if(sha) body.sha = sha;
+    const putR = await fetch(`https://api.github.com/repos/${cfg.user}/${cfg.repo}/contents/${cfg.file}`,{
+      method:'PUT',
+      headers:{'Authorization':'token '+cfg.token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    if(putR.ok){
+      if(btn){ btn.textContent='✅ Synced!'; setTimeout(()=>{ btn.textContent='☁️ Sync'; btn.disabled=false; },2000); }
+      const st=document.getElementById('importStatus');
+      if(st) st.textContent='☁️ Auto-synced '+new Date().toLocaleTimeString('th-TH');
+    } else {
+      const err=await putR.json();
+      throw new Error(err.message||putR.status);
+    }
+  }catch(e){
+    if(btn){ btn.textContent='❌'; btn.disabled=false; setTimeout(()=>{ btn.textContent='☁️ Sync'; },3000); }
+    if(!silent) alert('Sync ไม่สำเร็จ: '+e.message);
+  }
+}
+
+async function loadFromGithub(){
+  const cfg = getGhConfig();
+  if(!cfg.token||!cfg.user||!cfg.repo) return false;
+  try{
+    const r = await fetch(`https://api.github.com/repos/${cfg.user}/${cfg.repo}/contents/${cfg.file}`,{
+      headers:{'Authorization':'token '+cfg.token,'Accept':'application/vnd.github.v3+json'}
+    });
+    if(!r.ok) return false;
+    const j = await r.json();
+    const bytes=atob(j.content.replace(/\n/g,''));const arr=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)arr[i]=bytes.charCodeAt(i);const decoded=new TextDecoder().decode(arr);
+    const parsed = JSON.parse(decoded);
+    if(!parsed.monthsData||Object.keys(parsed.monthsData).length===0) return false;
+    if(Object.keys(monthsData).length>0){
+      Object.keys(parsed.monthsData).forEach(ym=>{
+        if(!monthsData[ym]) monthsData[ym]=parsed.monthsData[ym];
+      });
+    } else {
+      monthsData=parsed.monthsData;
+    }
+    saveToStorage();
+    const ym = parsed.activeYYYYMM||Object.keys(monthsData).sort().pop();
+    setActiveMonth(ym, false);
+    renderMonthSelect();
+    document.getElementById('importStatus').textContent='☁️ โหลดข้อมูลจาก GitHub สำเร็จ';
+    return true;
+  }catch(e){ return false; }
+}
+
+function updateSyncBtn(){
+  const cfg = getGhConfig();
+  const btn = document.getElementById('syncBtn');
+  if(!btn) return;
+  if(cfg.token&&cfg.user&&cfg.repo){
+    btn.style.background='rgba(40,167,69,.8)';
+    btn.title='Sync ไปที่ '+cfg.user+'/'+cfg.repo;
+  } else {
+    btn.style.background='rgba(255,255,255,.15)';
+    btn.title='ตั้งค่า GitHub ก่อน';
+  }
+}
+
+let _syncTimer = null;
+function saveToStorage(autoSync=true){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({monthsData, activeYYYYMM})); }catch(e){}
+  // Auto sync ขึ้น GitHub (debounce 3 วินาที)
+  if(autoSync && getGhConfig().token){
+    clearTimeout(_syncTimer);
+    _syncTimer = setTimeout(()=>{
+      syncToGithub(true); // silent mode
+    }, 3000);
+  }
+}
+function loadFromStorage(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return false;
+    const parsed = JSON.parse(raw);
+    if(!parsed.monthsData||Object.keys(parsed.monthsData).length===0) return false;
+    monthsData = parsed.monthsData;
+    const ym = parsed.activeYYYYMM||Object.keys(monthsData).sort().pop();
+    setActiveMonth(ym, false);
+    renderMonthSelect();
+    return true;
+  }catch(e){ return false; }
+}
+function clearStorage(){
+  localStorage.removeItem(LS_KEY);
+  monthsData={}; activeYYYYMM=null; soldiers=[];
+  biaData={}; selected=new Set(); currentBiaSoldiers=[];
+  const ip=document.getElementById('importPanel');
+  const mu=document.getElementById('mainUI');
+  if(ip) ip.style.display='block';
+  if(mu) mu.style.display='none';
+  const st=document.getElementById('importStatus');
+  if(st) st.textContent='🗑️ ล้างข้อมูลแล้ว';
+  goHome();
+}
+
+function getCfg(){
+  return{
+    month:document.getElementById('cfgMonth').value,
+    year:document.getElementById('cfgYear').value,
+    payDate:document.getElementById('cfgPayDate').value,
+    officer:document.getElementById('cfgOfficer').value,
+    dailyRate:parseFloat(document.getElementById('cfgDailyRate').value)||96,
+    dailyDeduct:parseFloat(document.getElementById('cfgDailyDeduct').value)||70,
+    days:parseInt(document.getElementById('cfgDays').value)||31,
+    savings:1000,
+  };
+}
+function calcNet(s,cfg){
+  // รับสุทธิ = เงินเดือน + พชค. - col32(จำนวนเงินที่ต้องหัก)
+  // savings และเบี้ยเลี้ยงโอนแยกเข้าบัญชี ไม่รวมใน รับสุทธิ
+  return s.salary + s.phck - s.deduct;
+}
+function fmt(n){return Number(n).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+/* ---- EXCEL IMPORT ---- */
+const MONTH_NAMES = ['','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const PAY_DATE_DEFAULTS = {1:'9 ก.พ.',2:'9 มี.ค.',3:'9 เม.ย.',4:'9 พ.ค.',5:'9 มิ.ย.',6:'9 ก.ค.',7:'9 ส.ค.',8:'9 ก.ย.',9:'9 ต.ค.',10:'9 พ.ย.',11:'9 ธ.ค.',12:'9 ม.ค.'};
+
+// col37 (AL) → กองร้อย
+const COL37_UNIT = {
+  '1':'ร้อย.บก.','01':'ร้อย.บก.',
+  '2':'ร้อย.1', '02':'ร้อย.1',
+  '3':'ร้อย.2', '03':'ร้อย.2',
+  '4':'ร้อย.คม.','04':'ร้อย.คม.',
+  '5':'ทหารใหม่','05':'ทหารใหม่',
+};
+const SHEET_UNIT = {'ร้อย.บก.':'ร้อย.บก.','ร้อย .1':'ร้อย.1','ร้อย.1':'ร้อย.1','ร้อย.2':'ร้อย.2','ร้อย.คม.':'ร้อย.คม.','ทหารใหม่':'ทหารใหม่'};
+
+function findColByHeader(headers, keywords){
+  for(var i=0;i<headers.length;i++){
+    var h=String(headers[i]||'').replace(/[\s]+/g,' ').trim();
+    if(keywords.some(function(k){return h.indexOf(k)>=0;})) return i;
+  }
+  return -1;
+}
+
+function parseRows(wb){
+  var result=[], detectedYYYYMM=null;
+  wb.SheetNames.forEach(function(sn){
+    var ws=wb.Sheets[sn];
+    var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    if(rows.length<2) return;
+    var hdr=rows[1];
+    var COL={
+      seq:0, id:1, fname:3, lname:4,
+      level:  findColByHeader(hdr,['(30,31)']),
+      salary: findColByHeader(hdr,['**(32)**']),
+      phck:   findColByHeader(hdr,['(34)','พชค']),
+      deduct: findColByHeader(hdr,['ต้องหัก']),
+      yyyymm: findColByHeader(hdr,['ปีเดือนที่จ่าย']),
+      unit:   findColByHeader(hdr,['หน่วยงาน 1'])
+    };
+    if(COL.level<0)  COL.level=27;
+    if(COL.salary<0) COL.salary=28;
+    if(COL.phck<0)   COL.phck=30;
+    if(COL.deduct<0) COL.deduct=32;
+    if(COL.yyyymm<0) COL.yyyymm=33;
+    if(COL.unit<0)   COL.unit=37;
+    var unitFullMap={'ร้อย.บก.':'ร้อย.บก.พัน.ช.คมศ.พล.ช.','ร้อย.1':'ร้อย.ช.คมศ.ที่ 1','ร้อย.2':'ร้อย.ช.คมศ.ที่ 2','ร้อย.คม.':'ร้อย.ช.คม.และ ซบร.','ทหารใหม่':'ทหารใหม่'};
+    rows.forEach(function(row,ri){
+      if(ri<2) return;
+      var seq=row[COL.seq]; if(!seq||isNaN(Number(seq))) return;
+      var col37Val=String(row[COL.unit]||'').trim().replace('.0','');
+      var unitLabel=COL37_UNIT[col37Val]||SHEET_UNIT[sn];
+      if(!unitLabel){ console.warn('unit not found: col='+col37Val+' sheet='+sn); return; }
+      var rawId=String(row[COL.id]||'').replace(/[^0-9]/g,'');
+      var fname=String(row[COL.fname]||'').trim();
+      var lname=String(row[COL.lname]||'').trim();
+      if(!fname&&!lname) return;
+      var levelRaw=String(row[COL.level]||'').trim();
+      var level=''; var lm=levelRaw.match(/([0-9]+)#\s*([0-9]+)#/);
+      if(lm) level='พ.'+lm[1]+'/'+lm[2];
+      var salary=parseFloat(String(row[COL.salary]||'0').replace(/,/g,''))||0;
+      var phck  =parseFloat(String(row[COL.phck]  ||'0').replace(/,/g,''))||0;
+      var deduct=parseFloat(String(row[COL.deduct]||'0').replace(/,/g,''))||0;
+      var rowYYYYMM=(row[COL.yyyymm]&&!isNaN(Number(row[COL.yyyymm])))?String(row[COL.yyyymm]).replace('.0',''):'';
+      if(!detectedYYYYMM&&rowYYYYMM) detectedYYYYMM=rowYYYYMM;
+      var unitFull=unitFullMap[unitLabel]||unitLabel;
+      var accountNo  = String(row[25]||'').trim().replace(/\.0$/,'');
+      var accountName= String(row[26]||'').trim();
+      result.push({id:rawId,fname:fname,lname:lname,unit:unitLabel,unitFull:unitFull,level:level,salary:salary,phck:phck,deduct:deduct,yyyymm:rowYYYYMM,accountNo:accountNo,accountName:accountName});
+    });
+  });
+  return {rows:result, yyyymm:detectedYYYYMM};
+}
+function applyDetectedMonth(yyyymm){
+  if(!yyyymm||yyyymm.length<6)return;
+  // 256905 → ปี 2569, เดือน 05
+  const year = yyyymm.slice(0,-2);    // '2569'
+  const mon  = parseInt(yyyymm.slice(-2)); // 5
+  if(mon>=1&&mon<=12){
+    document.getElementById('cfgMonth').value = MONTH_NAMES[mon];
+    document.getElementById('cfgYear').value  = year;
+    // วันที่จ่ายเงิน = เดือนถัดไป
+    const nextMon = mon===12?1:mon+1;
+    const nextYear = mon===12?String(parseInt(year)+1):year;
+    const shortYear = nextYear.slice(-2);
+    const shortMonths=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    document.getElementById('cfgPayDate').value = `9 ${shortMonths[nextMon]} ${shortYear}`;
+  }
+}
+
+function handleFile(input){
+  const file=input.files[0]; if(!file)return;
+  document.getElementById('importStatus').textContent='กำลังอ่านไฟล์...';
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const {rows}=parseRows(wb);
+      if(rows.length===0)throw new Error('ไม่พบข้อมูลในชีตที่รู้จัก');
+
+      // จัดกลุ่มแถวตาม yyyymm ของแต่ละแถว
+      const byMonth={};
+      rows.forEach(r=>{
+        const ym=r.yyyymm||'unknown';
+        if(!byMonth[ym])byMonth[ym]=[];
+        byMonth[ym].push(r);
+      });
+
+      let totalAdded=0, totalUpdated=0;
+      Object.keys(byMonth).forEach(ym=>{
+        const incoming=byMonth[ym];
+        if(monthsData[ym]){
+          // เดือนนี้มีข้อมูลแล้ว → merge กรองซ้ำด้วย id
+          // Merge: update ถ้า id ซ้ำ, เพิ่มถ้า id ใหม่
+          const existMap=new Map(monthsData[ym].soldiers.map(s=>[s.id,s]));
+          let added=0, updated=0;
+          incoming.forEach(r=>{
+            if(existMap.has(r.id)){
+              // อัพเดทข้อมูลคนเดิม (เงินเดือน/พชค./หักอาจเปลี่ยน)
+              const old=existMap.get(r.id);
+              Object.assign(old,{salary:r.salary,phck:r.phck,deduct:r.deduct,level:r.level,unit:r.unit,unitFull:r.unitFull,yyyymm:r.yyyymm});
+              updated++;
+            } else {
+              existMap.set(r.id,r);
+              added++;
+            }
+          });
+          monthsData[ym].soldiers=[...existMap.values()];
+          monthsData[ym].soldiers.forEach((s,i)=>s.no=i+1);
+          totalAdded+=added; totalUpdated++;
+        } else {
+          // เดือนใหม่ → สร้าง
+          incoming.forEach((s,i)=>s.no=i+1);
+          monthsData[ym]={label:getMonthLabel(ym), soldiers:incoming};
+          totalAdded+=incoming.length;
+          totalUpdated++;
+          applyDetectedMonth(ym);
+        }
+      });
+
+      // คง activeYYYYMM เดิม ถ้ายังมีข้อมูล มิฉะนั้นไปเดือนล่าสุด
+      const latestYM=Object.keys(byMonth).sort().pop();
+      const keepYM=(activeYYYYMM&&monthsData[activeYYYYMM])?activeYYYYMM:latestYM;
+      setActiveMonth(keepYM, false);
+      renderMonthTabs();
+      saveToStorage();
+      renderMonthSelect();
+
+      const months=Object.keys(byMonth).map(ym=>getMonthLabel(ym)).join(', ');
+      document.getElementById('importStatus').textContent=
+        `✅ เพิ่ม ${totalAdded} คน (${months})`;
+
+    }catch(err){
+      document.getElementById('importStatus').textContent='❌ '+err.message;
+      alert('อ่านไฟล์ไม่สำเร็จ: '+err.message);
+    }
+    input.value='';
+  };
+  reader.readAsBinaryString(file);
+}
+
+const dz=document.getElementById('dropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');const f=e.dataTransfer.files;if(f&&f.length) handleFile({files:f});});
+
+/* ---- BUILTIN ---- */
+const BUILTIN=[
+  {no:1,id:"1478400022607",fname:"อภิสิทธิ์",lname:"สุคำภา",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/20",salary:4870.0,phck:3154.0,deduct:1000.0,yyyymm:"256905",accountNo:"7360620929",accountName:"อภิสิทธิ์  สุคำภา"},
+  {no:2,id:"1709901584924",fname:"พัชรพล",lname:"ปานลา",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:1000.0,yyyymm:"256905",accountNo:"7360660343",accountName:"พัชรพล  ปานลา"},
+  {no:3,id:"1306600014186",fname:"สิทธิศักดิ์",lname:"หงษ์สูงเนิน",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:1000.0,yyyymm:"256905",accountNo:"7360660068",accountName:"สิทธิศักดิ์  หงษ์สูงเนิน"},
+  {no:4,id:"1129901789955",fname:"ณัฐพงศ์",lname:"วงค์ไชยา",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360660335",accountName:"ณัฐพงศ์  วงค์ไชยา"},
+  {no:5,id:"1102003448958",fname:"ธีรภัทร์",lname:"หมั่นมี",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:1000.0,yyyymm:"256905",accountNo:"7360682584",accountName:"ธีรภัทร์  หมั่นมี"},
+  {no:6,id:"1711200020831",fname:"กิตติธัช",lname:"กมลผาด",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:1000.0,yyyymm:"256905",accountNo:"7360683041",accountName:"กิตติธัช  กมลผาด"},
+  {no:7,id:"1306200021762",fname:"เดชาชัย",lname:"แย้มจันทึก",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360682363",accountName:"เดชาชัย  แย้มจันทึก"},
+  {no:8,id:"1678700022147",fname:"ทรงชัย",lname:"วันศิสุข",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:2000.0,yyyymm:"256905",accountNo:"7360682347",accountName:"ทรงชัย  วันศิสุข"},
+  {no:9,id:"1129701306918",fname:"อดิศร",lname:"ฤทธิเลิศ",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:1500.0,yyyymm:"256905",accountNo:"7360682436",accountName:"อดิศร  ฤทธิเลิศ"},
+  {no:10,id:"1309801422616",fname:"ไพศาล",lname:"รอดเดชา",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360682398",accountName:"ไพศาล  รอดเดชา"},
+  {no:11,id:"1719900679166",fname:"ปฐมพร",lname:"เชี่ยวชาญ",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:2000.0,yyyymm:"256905",accountNo:"7360696321",accountName:"ปฐมพร  เชี่ยวชาญ"},
+  {no:12,id:"1110201319401",fname:"สถาพร",lname:"จันทร์งาม",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:0.0,yyyymm:"256905",accountNo:"7360696178",accountName:"สถาพร  จันทร์งาม"},
+  {no:13,id:"1709901398331",fname:"อาทิตย์",lname:"เกิดทรัพย์",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:1000.0,yyyymm:"256905",accountNo:"7440509706",accountName:"อาทิตย์  เกิดทรัพย์"},
+  {no:14,id:"1104000059375",fname:"ธนาธร",lname:"เอี้ยงรอด",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:2000.0,yyyymm:"256905",accountNo:"7360718880",accountName:"ธนาธร  เอี้ยงรอด"},
+  {no:15,id:"1118700071932",fname:"สนธยา",lname:"ไกรยะราช",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:500.0,yyyymm:"256905",accountNo:"7360718767",accountName:"สนธยา  ไกรยะราช"},
+  {no:16,id:"1749901003603",fname:"ธนดล",lname:"สาดเอี่ยม",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:2000.0,yyyymm:"256905",accountNo:"7360718783",accountName:"ธนดล  สาดเอี่ยม"},
+  {no:17,id:"1101800949631",fname:"นฐกรณ์",lname:"แฝงแดง",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:500.0,yyyymm:"256905",accountNo:"7360718910",accountName:"นฐกรณ์  แฝงแดง"},
+  {no:18,id:"1249900765385",fname:"อัควุฒิ",lname:"เขียวจำรัส",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/17",salary:4160.0,phck:3864.0,deduct:3000.0,yyyymm:"256905",accountNo:"7360718872",accountName:"อัควุฒิ  เขียวจำรัส"},
+  {no:19,id:"1419902216701",fname:"ภูวดล",lname:"เพ็งพินิจ",unit:"ร้อย.บก.",unitFull:"ร้อย.บก.พัน.ช.คมศ.พล.ช.",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:500.0,yyyymm:"256905",accountNo:"7360718864",accountName:"ภูวดล  เพ็งพินิจ"},
+  {no:20,id:"1749800277414",fname:"อนุชา",lname:"อินทะโชติ",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/18",salary:567.74,phck:467.61,deduct:0.0,yyyymm:"256905",accountNo:"7360620961",accountName:"อนุชา   อินทะโชติ"},
+  {no:21,id:"1709901639311",fname:"สิรวิชญ์",lname:"มณีเนตร",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360660289",accountName:"สิรวิชญ์   มณีเนตร"},
+  {no:22,id:"1399400026299",fname:"คณิศร",lname:"วรรณพฤกษ์",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360682630",accountName:"คณิศร   วรรณพฤกษ์"},
+  {no:23,id:"1102170035505",fname:"อุดมศักดิ์",lname:"หวังโนนกลาง",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360683033",accountName:"อุดมศักดิ์   หวังโนนกลาง"},
+  {no:24,id:"1309903066355",fname:"ธนาธิป",lname:"ทรวงโพธิ์",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360683106",accountName:"ธนาธิป   ทรวงโพธิ์"},
+  {no:25,id:"1418000037950",fname:"ชัยธวัฒน์",lname:"ชื่นหญ้าปลอก",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360682789",accountName:"ชัยธวัฒน์  ชื่นหญ้าปลอก"},
+  {no:26,id:"1301502085246",fname:"พงศกร",lname:"ตอพิมาย",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360682819",accountName:"พงศกร    ตอพิมาย"},
+  {no:27,id:"1279900217248",fname:"เจษฎาภรณ์",lname:"แม่เขียว",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360682843",accountName:"เจษฎาภรณ์   แม่เขียว"},
+  {no:28,id:"1769900809621",fname:"นพดล",lname:"อาลัย",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:0.0,yyyymm:"256905",accountNo:"7360696658",accountName:"นพดล   อาลัย"},
+  {no:29,id:"1700200148208",fname:"ฉัตรนิมิตร",lname:"จันทร์บริบูรณ์",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:0.0,yyyymm:"256905",accountNo:"7360696216",accountName:"ฉัตรนิมิตร   จันทร์บิบูรณ์"},
+  {no:30,id:"1708100002802",fname:"บุญส่ง",lname:"ศรีทองรุ่งทิพย์",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:0.0,yyyymm:"256905",accountNo:"7360698375",accountName:"บุญส่ง   ศรีทองรุ่งทิพย์"},
+  {no:31,id:"1709901620629",fname:"จิราวัฒน์",lname:"วงษ์มหาจักร",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:0.0,yyyymm:"256905",accountNo:"7360695856",accountName:"จิราวัฒน์   วงษ์มหาจักร"},
+  {no:32,id:"1700200150822",fname:"สุรดิษ",lname:"พวงทอง",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:0.0,yyyymm:"256905",accountNo:"7360696070",accountName:"สุรดิษ   พวงทอง"},
+  {no:33,id:"1103702957364",fname:"ปัญญากร",lname:"ทองน้อย",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360718856",accountName:"ปัญญากร   ทองน้อย"},
+  {no:34,id:"1119600039744",fname:"พงศกร",lname:"บุญเคลิ้ม",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360718848",accountName:"พงศกร  บุญเคลิ้ม"},
+  {no:35,id:"1104300678607",fname:"ดิศรณ์",lname:"คมสัน",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360718899",accountName:"ดิศรณ์   คมสัน"},
+  {no:36,id:"1139900443273",fname:"ทรงวุฒิ",lname:"รู้รักตน",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360718813",accountName:"ทรงวุฒิ   รู้รักตน"},
+  {no:37,id:"1209000169158",fname:"ถิรกฤต",lname:"สีสองเมือง",unit:"ร้อย.1",unitFull:"ร้อย.ช.คมศ.ที่ 1",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360718805",accountName:"ถิรกฤต   สีสองเมือง"},
+  {no:38,id:"1709700273506",fname:"ธวัชชัย",lname:"โชติมา",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/20",salary:4870.0,phck:3154.0,deduct:500.0,yyyymm:"256905",accountNo:"7360706416",accountName:"ธวัชชัย   โชติมา"},
+  {no:39,id:"1709901569691",fname:"สุวรรณ",lname:"แก้วนาม",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360660327",accountName:"นายสุวรรณ แก้วนาม"},
+  {no:40,id:"1449900674159",fname:"ทรงศักดิ์",lname:"ปักสังคะเน",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:1000.0,yyyymm:"256905",accountNo:"7360682509",accountName:"ทรงศักดิ์  ปักสังคะเน"},
+  {no:41,id:"1301701384723",fname:"ธนพล",lname:"ฉ๋ำสันเทียะ",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360682452",accountName:"ธนพล  ฉ๋ำสันเทียะ"},
+  {no:42,id:"1449900658501",fname:"วัชราภรณ์",lname:"ริมสา",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360682568",accountName:"วัชราภรณ์  ริมสา"},
+  {no:43,id:"1449900666628",fname:"วรุตม์",lname:"แถลงศรี",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360682592",accountName:"วรุตม์  แถลงศรี"},
+  {no:44,id:"1319800382696",fname:"ทินภัทร",lname:"มานะมนัส",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:1000.0,yyyymm:"256905",accountNo:"7360682940",accountName:"ทินภัทร  มานะมนัส"},
+  {no:45,id:"1311800017176",fname:"นิรันดร์",lname:"ยืนยงชาติ",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:5000.0,yyyymm:"256905",accountNo:"7360683025",accountName:"นิรันดร์  ยืนยงชาติ"},
+  {no:46,id:"1711000129677",fname:"ก้องเกียรติ",lname:"ชาคำไสย์",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360683068",accountName:"ก้องเกียรติ  ชาคำไสย์"},
+  {no:47,id:"1709901672084",fname:"วีรภาพ",lname:"พวงทอง",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360695899",accountName:"วีรภาพ   พวงทอง"},
+  {no:48,id:"1100703552365",fname:"ธิติพงษ์",lname:"ท้วมมณี",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/17",salary:3864.0,phck:3960.0,deduct:0.0,yyyymm:"256905",accountNo:"7360696429",accountName:"ธิติพงษ์   ท้วมมณี"},
+  {no:49,id:"1341401267608",fname:"เฉลิมศักดิ์",lname:"ชัชวาล",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360696119",accountName:"เฉลิมศักดิ์   ชัชวาล"},
+  {no:50,id:"1709901639974",fname:"กัมปนาท",lname:"ปานสะอาด",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360695821",accountName:"กัมปนาท   ปานสะอาด"},
+  {no:51,id:"1700200147970",fname:"กรทักษ์",lname:"พงเพา",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/17",salary:3864.0,phck:3960.0,deduct:0.0,yyyymm:"256905",accountNo:"7360696143",accountName:"กรทักษ์   พงเพา"},
+  {no:52,id:"1709901701688",fname:"ศุภชัย",lname:"สุนทรวิภาค",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360696089",accountName:"ศุภชัย   สุนทรวิภาค"},
+  {no:53,id:"1100501523135",fname:"นพดล",lname:"แข็งขัน",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360718902",accountName:"นพดล   แข็งขัน"},
+  {no:54,id:"1103703384872",fname:"ธีรธัช",lname:"รุ่งเรืองภิญโญสุข",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360718945",accountName:"ธีรธัช   รุ่งเรืองภิญโญสุข"},
+  {no:55,id:"1104000095657",fname:"นนทภัทร",lname:"ฤทธิเรืองเดช",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360718961",accountName:"นนทภัทร   ฤทธิเรืองเดช"},
+  {no:56,id:"1259500052608",fname:"สิทธิชัย",lname:"ดาเสี่ยน",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360718988",accountName:"สิทธิชัย   ดาเสี่ยน"},
+  {no:57,id:"1209301150821",fname:"ณภัทร",lname:"ค้ากระบือ",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360718996",accountName:"ณภัทร   ค้ากระบือ"},
+  {no:58,id:"1200601376991",fname:"อานุวัฒน์",lname:"ทองอินทร์",unit:"ร้อย.2",unitFull:"ร้อย.ช.คมศ.ที่ 2",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360719003",accountName:"อานุวัฒน์   ทองอินทร์"},
+  {no:59,id:"1100201654854",fname:"ณัฐกรณ์",lname:"นุชคุ้ม",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:0.0,yyyymm:"256905",accountNo:"7360637686",accountName:"นายณัฐกรณ์ นุชคุ้ม"},
+  {no:60,id:"1319900896462",fname:"ธนวัฒน์",lname:"ตองติดรัมย์",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360683092",accountName:"นายธนวัฒน์ ตองติดรัม"},
+  {no:61,id:"1319000009311",fname:"กฤษฎา",lname:"อุส่าห์ค้า",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360682649",accountName:"นายกฤษฎา อุส่าห์ค้า"},
+  {no:62,id:"1319900922943",fname:"อัษฎาเทพ",lname:"อาชาพล",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:2000.0,yyyymm:"256905",accountNo:"7360682991",accountName:"นายอัษฎาเทพ อาชาพล"},
+  {no:63,id:"1738700019366",fname:"พงษ์สิทธิ์",lname:"พรมนัส",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:500.0,yyyymm:"256905",accountNo:"7360682797",accountName:"นายพงษ์สิทธิ์ พรมนัส"},
+  {no:64,id:"1319400014142",fname:"ณัฐวุฒิ",lname:"พัดพรม",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:2500.0,yyyymm:"256905",accountNo:"7360682886",accountName:"นายณัฐวุฒิ พัดพรม"},
+  {no:65,id:"1407800016115",fname:"สมเกียรติ",lname:"ประธาน",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:1000.0,yyyymm:"256905",accountNo:"7360682835",accountName:"นายสมเกียรติ ประธาน"},
+  {no:66,id:"1709901656810",fname:"อลงกรณ์",lname:"วิภักดิ์",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/19",salary:4620.0,phck:3404.0,deduct:0.0,yyyymm:"256905",accountNo:"7360696100",accountName:"นายอลงกรณ์ วิภักดิ์"},
+  {no:67,id:"1709100036546",fname:"ปรเมศวร์",lname:"ศิริแสร์",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:0.0,yyyymm:"256905",accountNo:"7360696151",accountName:"นายปรเมศวร์ ศิริแสร์"},
+  {no:68,id:"1709901614670",fname:"ปรีชา",lname:"รุ่งแท้",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:0.0,yyyymm:"256905",accountNo:"7360695848",accountName:"นายปรีชา รุ่งแท้"},
+  {no:69,id:"1103704158035",fname:"ศราวุฒิ",lname:"จันทร์ไพฑูรย์",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:0.0,yyyymm:"256905",accountNo:"7360696194",accountName:"นายศราวุฒิ จันทร์ไพฑูรย์"},
+  {no:70,id:"1709901581747",fname:"ทัตพงศ์",lname:"แก้วสอาด",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:0.0,yyyymm:"256905",accountNo:"7360696208",accountName:"นายทัตพงศ์ แก้วสอาด"},
+  {no:71,id:"1101801440180",fname:"สุพิชัย",lname:"โพชราช",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:0.0,yyyymm:"256905",accountNo:"7360696127",accountName:"นายสุพิชัย โพชราช"},
+  {no:72,id:"1709901626511",fname:"ธนเดช",lname:"คุ้มสกุล",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:0.0,yyyymm:"256905",accountNo:"7360696224",accountName:"นายธนเดช คุ้มสกุล"},
+  {no:73,id:"1700200149981",fname:"พลกฤต",lname:"แก้วสอาด",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/18",salary:4400.0,phck:3624.0,deduct:0.0,yyyymm:"256905",accountNo:"7360696186",accountName:"นายพลกฤต แก้วสอาด"},
+  {no:74,id:"1200101905650",fname:"กิตตินันท์",lname:"อรัญคีรี",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360718953",accountName:"นายกิตตินันท์ อรัญคีรี"},
+  {no:75,id:"1104300765194",fname:"เจษฎากร",lname:"เพียรดี",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360718929",accountName:"นายเจษฎากร เพียรดี"},
+  {no:76,id:"1669900536013",fname:"ศุภรัตน์",lname:"สุขเกษม",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/17",salary:4160.0,phck:3864.0,deduct:0.0,yyyymm:"256905",accountNo:"7360718937",accountName:"นายศุภรัตน์ สุขเกษม"},
+  {no:77,id:"1218500005862",fname:"สุธิมนต์",lname:"เฮงเล้า",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360719038",accountName:"นายสุธิมนต์ เฮงเล้า"},
+  {no:78,id:"1259500054830",fname:"ณัฐพงค์",lname:"นพพันธ์",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360719011",accountName:"นายณัฐพงค์ นพพันธ์"},
+  {no:79,id:"1218500018476",fname:"ณัชพงศ์",lname:"อึ้งหลี",unit:"ร้อย.คม.",unitFull:"ร้อย.ช.คม.และ ซบร.",level:"พ.1/16",salary:3670.0,phck:4354.0,deduct:0.0,yyyymm:"256905",accountNo:"7360719046",accountName:"นายณัชพงศ์ อึ้งหลี"},
+  {no:80,id:"1709901706264",fname:"ธีรภัทร์",lname:"ปิดสายะ",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733308",accountName:"ธีรภัทร์  ปิดสายะ"},
+  {no:81,id:"1709901644056",fname:"อาณัตพล",lname:"อินทรีย์",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733081",accountName:"อาณัตพล  อินทรีย์"},
+  {no:82,id:"1709901698261",fname:"ศุวิภัน",lname:"เดชวรรณ",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733235",accountName:"ศุวิภัน  เดชวรรณ"},
+  {no:83,id:"1709901690091",fname:"จิตติพัฒน์",lname:"สวัสดีนาม",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360732859",accountName:"จิตติพัฒน์  สวัสดีนาม"},
+  {no:84,id:"1700200154569",fname:"ธาวิน",lname:"โชติช่วง",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360732883",accountName:"ธาวิน  โชติช่วง"},
+  {no:85,id:"1709901657611",fname:"ชนาธิป",lname:"อุทัยนา",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733049",accountName:"ชนาธิป  อุทัยนา"},
+  {no:86,id:"1709700360913",fname:"รณกร",lname:"อนุตโร",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733529",accountName:"รณกร  อนุตโร"},
+  {no:87,id:"1700200155361",fname:"ธนากร",lname:"ทับทิมสี",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733146",accountName:"ธนากร  ทับทิมสี"},
+  {no:88,id:"1102003775452",fname:"ธีรพงศ์",lname:"คำลุน",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360732816",accountName:"ธีรพงศ์  คำลุน"},
+  {no:89,id:"1679800386681",fname:"ธันวา",lname:"แย้มเสาธง",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360732980",accountName:"ธันวา  แย้มเสาธง"},
+  {no:90,id:"1709901733938",fname:"ธนวัฒน์",lname:"สีหาบง",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733278",accountName:"ธนวัฒน์  สีหาบง"},
+  {no:91,id:"1700200158173",fname:"ณัชพล",lname:"เยือกเย็น",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733391",accountName:"ณัชพล  เยือกเย็น"},
+  {no:92,id:"1709100037151",fname:"นพดล",lname:"กองทาน",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360732824",accountName:"นพดล  กองทาน"},
+  {no:93,id:"1709901708488",fname:"ณัฐพงศ์",lname:"จุนคีรี",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360732867",accountName:"ณัฐพงศ์  จุนคีรี"},
+  {no:94,id:"1700200152256",fname:"กิรนันท์",lname:"สมบัติเจริญ",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733154",accountName:"กิรนันท์   สมบัติเจริญ"},
+  {no:95,id:"1709901679127",fname:"ปรินทร",lname:"อ่อนแก้ว",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733375",accountName:"ปรินทร   อ่อนแก้ว"},
+  {no:96,id:"1709901649317",fname:"วสันต์",lname:"มีสวัสดิ์",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733065",accountName:"วสันต์   มีสวัสดิ์"},
+  {no:97,id:"1709901654906",fname:"วันชัย",lname:"เมืองยวง",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733138",accountName:"วันชัย   เมืองยวง"},
+  {no:98,id:"1700200153180",fname:"ภาณุวิชญ์",lname:"อาสนเวช",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733200",accountName:"ภาณุวิชญ์   อาสนเวช"},
+  {no:99,id:"1700200155859",fname:"ศุภกฤต",lname:"เรรัย",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733383",accountName:"ศุภกฤต   เรรัย"},
+  {no:100,id:"1700200160186",fname:"นนทวัฒน์",lname:"สระทองแป้น",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360732891",accountName:"นนทวัฒน์   สระทองแป้น"},
+  {no:101,id:"1709100037941",fname:"ศิลา",lname:"นงนุช",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360732948",accountName:"ศิลา   นงนุช"},
+  {no:102,id:"1700200149344",fname:"พัตพงศ์",lname:"ตาเสน",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360732999",accountName:"ทัตพงศ์   ตาเสน"},
+  {no:103,id:"1700200153554",fname:"สุชาติ",lname:"ระย้าย้อย",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733111",accountName:"สุชาติ   ระย้าย้อย"},
+  {no:104,id:"1709100031765",fname:"สรสิช",lname:"อ้นเบ้า",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360732832",accountName:"นายสรสิช อ้นเบ้า"},
+  {no:105,id:"1709901725269",fname:"พัฒดลย์",lname:"คชาใหญ่",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360732913",accountName:"นายพัฒดลย์ คชาใหญ่"},
+  {no:106,id:"1709901678481",fname:"ศักดิ์ชัย",lname:"เกลียวสัมพันธ์ใจ",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733510",accountName:"นายศักดิ์ชัย เกลียวสัมพันธ์ใจ"},
+  {no:107,id:"1700200147601",fname:"ออมทรัพย์",lname:"ขุนศรีรักษา",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360732964",accountName:"นายออมทรัพย์ ขุนศรีรักษา"},
+  {no:108,id:"1709901466859",fname:"นัทธพงศ์",lname:"ตาเสน",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733022",accountName:"นายนัทธพงศ์ ตาเสน"},
+  {no:109,id:"1700200153422",fname:"ทรงพล",lname:"ชมภูพันธ์",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733405",accountName:"นายทรงพล ชมภูพันธ์"},
+  {no:110,id:"1709901652601",fname:"ณัฐกิตติ์",lname:"อ่อนคำ",unit:"ทหารใหม่",unitFull:"ทหารใหม่",level:"พ.1/3",salary:1630.0,phck:6394.0,deduct:0.0,yyyymm:"256905",accountNo:"7360733332",accountName:"นายณัฐกิตติ์ อ่อนคำ"},
+];
+function loadBuiltIn(){const d=BUILTIN.map((s,i)=>({...s,no:i+1}));loadMonth(d,'256905',true);applyDetectedMonth('256905');renderMonthSelect();}
+
+function getMonthLabel(yyyymm){
+  const MONTH_TH=['','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  if(!yyyymm||yyyymm.length<6)return yyyymm;
+  return MONTH_TH[parseInt(yyyymm.slice(-2))]+'  '+yyyymm.slice(0,-2);
+}
+
+function loadMonth(data, yyyymm, resetCfg){
+  if(!yyyymm) yyyymm = 'unknown';
+  monthsData[yyyymm] = {label: getMonthLabel(yyyymm), soldiers: data};
+  setActiveMonth(yyyymm, resetCfg);
+  renderMonthTabs();
+  saveToStorage();
+}
+
+function setActiveMonth(yyyymm, resetCfg){
+  activeYYYYMM = yyyymm;
+  soldiers = (monthsData[yyyymm]||{soldiers:[]}).soldiers;
+  selected.clear();
+  const UNIT_ORDER=['ร้อย.บก.','ร้อย.1','ร้อย.2','ร้อย.คม.','ทหารใหม่'];
+  const allUnits=[...new Set(soldiers.map(s=>s.unit))];
+  units = UNIT_ORDER.filter(u=>allUnits.includes(u)).concat(allUnits.filter(u=>!UNIT_ORDER.includes(u)));
+  const uf = document.getElementById('unitFilter');
+  if(uf){
+    uf.innerHTML = '<option value="all">— ทั้งหมด —</option>';
+    units.forEach(u=>{const o=document.createElement('option');o.value=u;o.textContent=u;uf.appendChild(o);});
+  }
+  // ซ่อน importPanel
+  const ip = document.getElementById('importPanel');
+  if(ip) ip.style.display='none';
+  // ถ้ายังไม่ได้เลือก tab → โชว์ landing
+  const lp2 = document.getElementById('landingPage');
+  const ss = document.getElementById('salarySection');
+  const bs = document.getElementById('biaSection');
+  const isLandingVisible = lp2&&lp2.style.display!=='none';
+  const isSalaryVisible = ss&&ss.style.display==='block';
+  const isBiaVisible = bs&&bs.style.display==='block';
+  if(!isSalaryVisible&&!isBiaVisible){
+    if(lp2) lp2.style.display='block';
+  }
+  const ts = document.getElementById('topbarSub');
+  if(ts) ts.textContent = soldiers.length+' คน — '+units.join(', ');
+  render();
+  renderSummaryInline();
+}
+
+function renderMonthTabs(){ renderMonthSelect(); } // compat alias
+
+function renderMonthSelect(){
+  const wrap = document.getElementById('monthTabs');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  const keys = Object.keys(monthsData).sort();
+  if(keys.length===0) return;
+
+  // Label
+  const lbl = document.createElement('span');
+  lbl.style.cssText='font-size:13px;color:#555;align-self:center;white-space:nowrap;';
+  lbl.textContent='📅 เดือน:';
+  wrap.appendChild(lbl);
+
+  // Dropdown
+  const sel = document.createElement('select');
+  sel.style.cssText='padding:6px 12px;border:1px solid #bbb;border-radius:7px;font-family:Sarabun,sans-serif;font-size:14px;background:#fff;cursor:pointer;';
+  keys.forEach(ym=>{
+    const opt=document.createElement('option');
+    opt.value=ym;
+    opt.textContent=monthsData[ym].label+' ('+monthsData[ym].soldiers.length+' คน)';
+    if(ym===activeYYYYMM) opt.selected=true;
+    sel.appendChild(opt);
+  });
+  sel.onchange=()=>{ setActiveMonth(sel.value, false); renderMonthSelect(); };
+  wrap.appendChild(sel);
+
+
+
+  // ปุ่มลบเดือน
+  const delBtn=document.createElement('button');
+  delBtn.className='btn no-print';
+  delBtn.style.cssText='font-size:13px;padding:6px 12px;background:#fff0f0;color:#8b2000;border-color:#f0b3b3;';
+  delBtn.textContent='🗑️ ลบเดือนนี้';
+  delBtn.onclick=()=>{
+    const md=monthsData[activeYYYYMM];
+    if(!md)return;
+    if(!confirm('ลบข้อมูลเดือน '+md.label+' ('+md.soldiers.length+' คน) ?'))return;
+    delete monthsData[activeYYYYMM];
+    const remaining=Object.keys(monthsData).sort();
+    if(remaining.length>0){ setActiveMonth(remaining[remaining.length-1],false); renderMonthSelect(); }
+    else{ soldiers=[]; document.getElementById('importPanel').style.display='block'; document.getElementById('mainUI').style.display='none'; }
+  };
+  wrap.appendChild(delBtn);
+}
+
+function renderSummaryInline(){
+  const panel = document.getElementById('summaryPanel');
+  if(!panel) return;
+  const ym = activeYYYYMM;
+  const md = monthsData[ym];
+  if(!md||md.soldiers.length===0){ panel.style.display='none'; return; }
+  panel.style.display='block';
+  const list = md.soldiers;
+  const totSal=list.reduce((a,s)=>a+s.salary,0);
+  const totPhck=list.reduce((a,s)=>a+s.phck,0);
+  const totDed=list.reduce((a,s)=>a+s.deduct,0);
+  const totNet=list.reduce((a,s)=>a+calcNet(s),0);
+  const byUnit={};
+  list.forEach(s=>{
+    if(!byUnit[s.unit])byUnit[s.unit]={count:0,sal:0,phck:0,ded:0,net:0};
+    byUnit[s.unit].count++;
+    byUnit[s.unit].sal+=s.salary;
+    byUnit[s.unit].phck+=s.phck;
+    byUnit[s.unit].ded+=s.deduct;
+    byUnit[s.unit].net+=calcNet(s);
+  });
+  let rows='';
+  Object.keys(byUnit).forEach(u=>{
+    const d=byUnit[u];
+    rows+=`<tr>
+      <td style="padding:7px 12px;">${u}</td>
+      <td style="padding:7px 12px;text-align:right;">${d.count} คน</td>
+      <td style="padding:7px 12px;text-align:right;font-variant-numeric:tabular-nums;">${fmt(d.sal)}</td>
+      <td style="padding:7px 12px;text-align:right;font-variant-numeric:tabular-nums;">${fmt(d.phck)}</td>
+      <td style="padding:7px 12px;text-align:right;font-variant-numeric:tabular-nums;color:#8b2000;">${fmt(d.ded)}</td>
+      <td style="padding:7px 12px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:#1a4f8a;">${fmt(d.net)}</td>
+    </tr>`;
+  });
+  panel.innerHTML=`
+    <div style="background:#1a4f8a;color:#fff;padding:8px 14px;font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center;">
+      <span>📊 สรุปยอดเงินเดือน — ${md.label}</span>
+      <span style="font-size:12px;opacity:.8;">${list.length} คน ทั้งหมด</span>
+    </div>
+    <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:13.5px;">
+      <thead>
+        <tr style="background:#f0f4fb;border-bottom:1.5px solid #c5d8f0;">
+          <th style="padding:8px 12px;text-align:left;font-weight:600;color:#444;">กองร้อย</th>
+          <th style="padding:8px 12px;text-align:right;font-weight:600;color:#444;">จำนวน</th>
+          <th style="padding:8px 12px;text-align:right;font-weight:600;color:#444;">เงินเดือน</th>
+          <th style="padding:8px 12px;text-align:right;font-weight:600;color:#444;">พชค.</th>
+          <th style="padding:8px 12px;text-align:right;font-weight:600;color:#444;">หัก</th>
+          <th style="padding:8px 12px;text-align:right;font-weight:600;color:#444;">รับสุทธิ</th>
+        </tr>
+      </thead>
+      <tbody style="font-size:13.5px;">
+        ${rows}
+        <tr style="background:#eef3fa;border-top:2px solid #b3ccf0;font-weight:700;">
+          <td style="padding:8px 12px;">รวมทั้งหมด</td>
+          <td style="padding:8px 12px;text-align:right;">${list.length} คน</td>
+          <td style="padding:8px 12px;text-align:right;font-variant-numeric:tabular-nums;">${fmt(totSal)}</td>
+          <td style="padding:8px 12px;text-align:right;font-variant-numeric:tabular-nums;">${fmt(totPhck)}</td>
+          <td style="padding:8px 12px;text-align:right;font-variant-numeric:tabular-nums;color:#8b2000;">${fmt(totDed)}</td>
+          <td style="padding:8px 12px;text-align:right;font-variant-numeric:tabular-nums;color:#1a4f8a;">${fmt(totNet)}</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>`;
+}
+
+function showMonthSummary(ym){
+  const md = monthsData[ym];
+  if(!md)return;
+  const list = md.soldiers;
+  const totSal = list.reduce((a,s)=>a+s.salary,0);
+  const totPhck= list.reduce((a,s)=>a+s.phck,0);
+  const totDed = list.reduce((a,s)=>a+s.deduct,0);
+  const totNet = list.reduce((a,s)=>a+calcNet(s),0);
+  // แยกตามกองร้อย
+  const byUnit = {};
+  list.forEach(s=>{if(!byUnit[s.unit])byUnit[s.unit]={count:0,sal:0,phck:0,ded:0,net:0};
+    byUnit[s.unit].count++;byUnit[s.unit].sal+=s.salary;byUnit[s.unit].phck+=s.phck;
+    byUnit[s.unit].ded+=s.deduct;byUnit[s.unit].net+=calcNet(s);});
+  let rows='';
+  Object.keys(byUnit).forEach(u=>{
+    const d=byUnit[u];
+    rows+=`<tr><td style="padding:6px 10px;">${u}</td><td class="num" style="padding:6px 10px;">${d.count}</td><td class="num" style="padding:6px 10px;">${fmt(d.sal)}</td><td class="num" style="padding:6px 10px;">${fmt(d.phck)}</td><td class="num" style="padding:6px 10px;color:#8b2000;">${fmt(d.ded)}</td><td class="num" style="padding:6px 10px;font-weight:700;color:#1a4f8a;">${fmt(d.net)}</td></tr>`;
+  });
+  document.getElementById('modalTitle').textContent='สรุปยอด — '+md.label;
+  document.getElementById('modalBody').innerHTML=`
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <thead><tr style="background:#f0f0eb;">
+        <th style="padding:8px 10px;text-align:left;">กองร้อย</th>
+        <th style="padding:8px 10px;text-align:right;">จำนวน</th>
+        <th style="padding:8px 10px;text-align:right;">เงินเดือน</th>
+        <th style="padding:8px 10px;text-align:right;">พชค.</th>
+        <th style="padding:8px 10px;text-align:right;">หัก</th>
+        <th style="padding:8px 10px;text-align:right;">รับสุทธิ</th>
+      </tr></thead>
+      <tbody>${rows}
+        <tr style="background:#eef3fa;font-weight:700;border-top:2px solid #bbb;">
+          <td style="padding:8px 10px;">รวมทั้งหมด</td>
+          <td class="num" style="padding:8px 10px;">${list.length} คน</td>
+          <td class="num" style="padding:8px 10px;">${fmt(totSal)}</td>
+          <td class="num" style="padding:8px 10px;">${fmt(totPhck)}</td>
+          <td class="num" style="padding:8px 10px;color:#8b2000;">${fmt(totDed)}</td>
+          <td class="num" style="padding:8px 10px;color:#1a4f8a;">${fmt(totNet)}</td>
+        </tr>
+      </tbody>
+    </table>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function loadSoldiers(data, resetMonth){
+  // legacy wrapper — ใช้ loadMonth แทน
+  const ym = data.length>0&&data[0].yyyymm ? data[0].yyyymm : activeYYYYMM||'unknown';
+  loadMonth(data, ym, resetMonth);
+}
+
+function getFiltered(){
+  const unit=document.getElementById('unitFilter').value;
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  return soldiers.filter(s=>(unit==='all'||s.unit===unit)&&(!q||s.fname.includes(q)||s.lname.includes(q)||s.id.includes(q)));
+}
+function render(){
+  const cfg=getCfg(), filtered=getFiltered();
+  const tbody=document.getElementById('tableBody'); tbody.innerHTML='';
+  filtered.forEach(s=>{
+    const net=calcNet(s,cfg);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="text-align:center;"><input type="checkbox" onchange="toggleOne(${s.no},this.checked)" ${selected.has(s.no)?'checked':''} style="width:15px;height:15px;cursor:pointer;"></td>
+      <td>${s.no}</td><td style="white-space:nowrap;"><strong style="font-weight:600;">พลฯ ${s.fname}</strong> ${s.lname}</td>
+      <td><span class="badge badge-blue">${s.unit}</span></td>
+      <td style="font-size:12px;color:#555;">${s.level}</td>
+      <td class="num">${fmt(s.salary)}</td><td class="num">${fmt(s.phck)}</td>
+      <td class="num" style="color:${s.deduct>0?'#8b2000':'#aaa'}">${s.deduct>0?fmt(s.deduct):'-'}</td>
+      <td class="num"><strong style="color:#1a4f8a;">${fmt(net)}</strong></td>
+      <td style="display:flex;gap:4px;">
+        <button class="btn btn-sm" onclick="previewOne(${s.no})">👁 ดู</button>
+        <button class="btn btn-sm" onclick="editOne(${s.no})" style="background:#fff8e6;color:#7c5800;border-color:#f0d080;">✏️</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('masterCheck').checked=filtered.length>0&&filtered.every(s=>selected.has(s.no));
+  updateCount(); updateTotalBar();
+}
+function updateCount(){document.getElementById('selectedCount').textContent=selected.size>0?`✔ เลือกแล้ว ${selected.size} คน`:'';}
+function updateTotalBar(){
+  const sel=soldiers.filter(s=>selected.has(s.no));
+  if(!sel.length){document.getElementById('totalBar').style.display='none';return;}
+  const cfg=getCfg();
+  const tS=sel.reduce((a,s)=>a+s.salary,0),tP=sel.reduce((a,s)=>a+s.phck,0);
+  const tD=sel.reduce((a,s)=>a+s.deduct,0),tN=sel.reduce((a,s)=>a+calcNet(s,cfg),0);
+  document.getElementById('totalBar').style.display='flex';
+  document.getElementById('totalBar').innerHTML=`
+    <div class="total-item"><small>เงินเดือนรวม</small><span>${fmt(tS)}</span></div>
+    <div class="total-item"><small>พชค.รวม</small><span>${fmt(tP)}</span></div>
+    <div class="total-item"><small>หักรวม</small><span style="color:#8b2000;">${fmt(tD)}</span></div>
+    <div class="total-item"><small>รับสุทธิรวม</small><span>${fmt(tN)}</span></div>
+    <div class="total-item"><small>จำนวนที่เลือก</small><span>${selected.size} คน</span></div>`;
+}
+function toggleOne(no,v){v?selected.add(no):selected.delete(no);updateCount();updateTotalBar();}
+function toggleAll(v){getFiltered().forEach(s=>v?selected.add(s.no):selected.delete(s.no));render();}
+function selectAll(){getFiltered().forEach(s=>selected.add(s.no));render();}
+function clearAll(){selected.clear();render();}
+document.getElementById('unitFilter').addEventListener('change',render);
+document.getElementById('searchInput').addEventListener('input',render);
+// โหลดข้อมูลตอนเริ่ม: GitHub ก่อน → LocalStorage → แสดง import panel
+updateSyncBtn();
+window.addEventListener('DOMContentLoaded', ()=>{
+  (async()=>{
+    const fromGH = await loadFromGithub();
+    if(!fromGH){
+      const fromLS = loadFromStorage();
+      if(!fromLS){
+        // ไม่มีข้อมูล แสดง import panel ปกติ
+      }
+    }
+  })();
+});
+
+/* ===== PAYSLIP BUILDER ===== */
+function buildSlip(s, pageNo, cfg){
+  cfg=cfg||getCfg();
+  const income=s.salary+s.phck;
+  const biaBiangGross = cfg.dailyRate * cfg.days;
+  const biaBiangDeductTotal = cfg.dailyDeduct * cfg.days;
+  const biaBiangNet = biaBiangGross - biaBiangDeductTotal;
+  // เงินออมเพิ่มพลทหาร = col32 (s.deduct)
+  const savings = s.deduct;
+  const net = calcNet(s,cfg);  // = salary + phck - deduct
+
+  return `<div class="slip-outer">
+<table class="slip" cellspacing="0" cellpadding="0">
+  <!-- Row 1: Title + Page No -->
+  <tr>
+    <td colspan="6" style="border:none;padding:5px 10px 0;position:relative;">
+      <div style="text-align:center;font-size:15px;font-weight:700;">ใบจ่ายเงินเดือนทหารกองประจำการ</div>
+      <div style="position:absolute;top:5px;right:10px;font-size:14px;">${pageNo}</div>
+    </td>
+  </tr>
+  <!-- Row 2: Month -->
+  <tr>
+    <td colspan="6" style="border:none;text-align:center;padding:2px 6px 5px;font-size:14px;">
+      เดือน &nbsp;<strong style="font-size:16px;">${cfg.month}</strong>&nbsp;&nbsp;&nbsp; ${cfg.year}
+    </td>
+  </tr>
+  <!-- divider -->
+  <tr><td colspan="6" style="border:none;border-top:1.5px solid #333;padding:0;"></td></tr>
+  <!-- Header: ชื่อ / เลข / หน่วย / วันที่ -->
+  <tr>
+    <th class="hdr-th" style="width:20%;">ชื่อ</th>
+    <th class="hdr-th" style="width:22%;">เลขประจำตัว<br>ประชาชน</th>
+    <th class="hdr-th" style="width:22%;">หน่วย</th>
+    <th class="hdr-th" colspan="3">วันที่จ่ายเงิน</th>
+  </tr>
+  <!-- Name row -->
+  <tr>
+    <td style="font-weight:700;font-size:14px;white-space:nowrap;">พลฯ ${s.fname} ${s.lname}</td>
+    <td style="text-align:center;font-size:13px;">${s.id}</td>
+    <td style="text-align:center;font-size:12px;">${s.unitFull||"รอย.บก.พัน.ช.คมศ.พบ.ช."}</td>
+    <td colspan="3" style="text-align:center;font-weight:700;font-size:14px;">${cfg.payDate}</td>
+  </tr>
+  <!-- รายได้ label -->
+  <tr><td colspan="6" class="section-td">รายได้</td></tr>
+  <!-- รายได้ sub-header -->
+  <tr>
+    <td class="sub-td">ระดับชั้น</td>
+    <td class="sub-td">เงินเดือน</td>
+    <td colspan="3" class="sub-td">เงินเพิ่มการครองชีพชั่วคราว</td>
+    <td class="sub-td">รวมรายได้</td>
+  </tr>
+  <!-- รายได้ data -->
+  <tr>
+    <td class="data-center">${s.level}</td>
+    <td class="data-td">${fmt(s.salary)}</td>
+    <td colspan="3" class="data-td">${fmt(s.phck)}</td>
+    <td class="data-td">${fmt(income)}</td>
+  </tr>
+  <!-- รายจ่าย label -->
+  <tr><td colspan="6" class="section-td">รายจ่าย</td></tr>
+  <!-- รายจ่าย sub-header -->
+  <tr>
+    <td class="sub-td">เงินส่วนตัวทหารฝาก</td>
+    <td class="sub-td">เงินออมเพิ่มพลทหาร</td>
+    <td colspan="2" class="sub-td">ค่าศพหน่วย</td>
+    <td colspan="2" class="sub-td">รวมรายจ่าย</td>
+  </tr>
+  <!-- รายจ่าย data -->
+  <tr>
+    <td class="data-center">-</td>
+    <td class="data-td">${savings>0?fmt(savings):'-'}</td>
+    <td colspan="2" class="data-center">-</td>
+    <td colspan="2" class="data-td">${savings>0?fmt(savings):'-'}</td>
+  </tr>
+  <!-- เบี้ยเลี้ยง + รับสุทธิ -->
+  <tr>
+    <td colspan="4" style="border-right:none;padding:6px 10px;vertical-align:top;">
+      <div style="font-weight:700;font-size:13.5px;margin-bottom:4px;">เบี้ยเลี้ยง</div>
+      <div style="font-size:13px;">1. ปกติ ${cfg.dailyRate} บาท/คน/วัน</div>
+      <div style="font-size:13px;">หักค่าประกอบเลี้ยง ${cfg.dailyDeduct} บาท/คน/วัน</div>
+    </td>
+    <td colspan="2" style="border-left:none;vertical-align:middle;text-align:right;padding:6px 12px;">
+      <div style="font-weight:700;font-size:13px;text-align:center;margin-bottom:4px;">รับสุทธิ</div>
+      <div style="font-size:20px;font-weight:700;text-align:right;">${fmt(net)}</div>
+    </td>
+  </tr>
+  <!-- Footer -->
+  <tr>
+    <td colspan="6" style="border-top:1.5px solid #555;padding:8px 12px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+        <div>
+          <div style="font-weight:700;margin-bottom:2px;">หมายเหตุ</div>
+          <div style="font-size:13px;">1) เงินเดือนและเงิน พชค. คงเหลือ โอนเข้าบัญชี</div>
+          <div style="font-size:13px;">2) เบี้ยเลี้ยง โอนเข้าบัญชี</div>
+        </div>
+        <div style="font-size:13px;text-align:center;">
+          <div style="margin-bottom:28px;">&nbsp;</div>
+          <div style="text-align:left;padding-left:16px;font-weight:700;">ร.ท.</div>
+          <div>( ${cfg.officer})</div>
+          <div style="font-weight:700;">นายทหารการเงินและการบัญชี พัน.ช.คมศ.พล.ช.</div>
+        </div>
+      </div>
+    </td>
+  </tr>
+</table>
+</div>`;
+}
+
+function editOne(no){
+  const s=soldiers.find(x=>x.no===no);
+  if(!s)return;
+  document.getElementById('modalTitle').textContent='✏️ แก้ไขข้อมูล — พลฯ '+s.fname+' '+s.lname;
+  document.getElementById('modalBody').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:14px;">
+      <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">ชื่อ</label>
+        <input id="edit_fname" value="${s.fname}" style="width:100%;padding:7px 10px;border:1px solid #ccc;border-radius:7px;font-family:inherit;font-size:14px;"></div>
+      <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">นามสกุล</label>
+        <input id="edit_lname" value="${s.lname}" style="width:100%;padding:7px 10px;border:1px solid #ccc;border-radius:7px;font-family:inherit;font-size:14px;"></div>
+      <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">ระดับ/ขั้น</label>
+        <input id="edit_level" value="${s.level}" style="width:100%;padding:7px 10px;border:1px solid #ccc;border-radius:7px;font-family:inherit;font-size:14px;"></div>
+      <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">หน่วย</label>
+        <select id="edit_unit" style="width:100%;padding:7px 10px;border:1px solid #ccc;border-radius:7px;font-family:inherit;font-size:14px;">
+          ${['ร้อย.บก.','ร้อย.1','ร้อย.2','ร้อย.คม.','ทหารใหม่'].map(u=>`<option value="${u}" ${u===s.unit?'selected':''}>${u}</option>`).join('')}
+        </select></div>
+      <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">เงินเดือน</label>
+        <input id="edit_salary" type="number" value="${s.salary}" style="width:100%;padding:7px 10px;border:1px solid #ccc;border-radius:7px;font-family:inherit;font-size:14px;"></div>
+      <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">พชค.</label>
+        <input id="edit_phck" type="number" value="${s.phck}" style="width:100%;padding:7px 10px;border:1px solid #ccc;border-radius:7px;font-family:inherit;font-size:14px;"></div>
+      <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">จำนวนเงินที่หัก</label>
+        <input id="edit_deduct" type="number" value="${s.deduct}" style="width:100%;padding:7px 10px;border:1px solid #ccc;border-radius:7px;font-family:inherit;font-size:14px;"></div>
+      <div><label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">เลขประจำตัว</label>
+        <input id="edit_id" value="${s.id}" style="width:100%;padding:7px 10px;border:1px solid #ccc;border-radius:7px;font-family:inherit;font-size:14px;"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end;">
+      <button class="btn" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveEdit(${no})">💾 บันทึก</button>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function saveEdit(no){
+  const s=soldiers.find(x=>x.no===no);
+  if(!s)return;
+  const unitFullMap={'ร้อย.บก.':'ร้อย.บก.พัน.ช.คมศ.พล.ช.','ร้อย.1':'ร้อย.ช.คมศ.ที่ 1','ร้อย.2':'ร้อย.ช.คมศ.ที่ 2','ร้อย.คม.':'ร้อย.ช.คม.และ ซบร.','ทหารใหม่':'ทหารใหม่'};
+  s.fname=document.getElementById('edit_fname').value.trim();
+  s.lname=document.getElementById('edit_lname').value.trim();
+  s.level=document.getElementById('edit_level').value.trim();
+  s.unit=document.getElementById('edit_unit').value;
+  s.unitFull=unitFullMap[s.unit]||s.unit;
+  s.salary=parseFloat(document.getElementById('edit_salary').value)||0;
+  s.phck=parseFloat(document.getElementById('edit_phck').value)||0;
+  s.deduct=parseFloat(document.getElementById('edit_deduct').value)||0;
+  s.id=document.getElementById('edit_id').value.trim();
+  // อัพเดท monthsData
+  if(activeYYYYMM&&monthsData[activeYYYYMM]){
+    const idx=monthsData[activeYYYYMM].soldiers.findIndex(x=>x.id===s.id);
+    if(idx>=0)monthsData[activeYYYYMM].soldiers[idx]=s;
+  }
+  saveToStorage();
+  closeModal();
+  render();
+  renderSummaryInline();
+}
+
+function previewOne(no){
+  const s=soldiers.find(x=>x.no===no);
+  document.getElementById('modalTitle').textContent=`ใบเงินเดือน — พลฯ ${s.fname} ${s.lname}`;
+  document.getElementById('modalBody').innerHTML=buildSlip(s,s.no);
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+function doPrint(){
+  const body=document.getElementById('modalBody').innerHTML;
+  openPrint([body]);
+}
+function printSelected(){
+  const sel=soldiers.filter(s=>selected.has(s.no));
+  if(!sel.length){alert('กรุณาเลือกรายชื่อก่อนพิมพ์');return;}
+  const cfg=getCfg();
+  openPrint(sel.map(s=>buildSlip(s,s.no,cfg)));
+}
+function printByUnit(){
+  const cfg=getCfg();
+  const UNIT_ORDER=['ร้อย.บก.','ร้อย.1','ร้อย.2','ร้อย.คม.','ทหารใหม่'];
+  const allUnits=[...new Set(soldiers.map(s=>s.unit))];
+  const orderedUnits=UNIT_ORDER.filter(u=>allUnits.includes(u)).concat(allUnits.filter(u=>!UNIT_ORDER.includes(u)));
+  // สร้าง slip ทีละกองร้อย มีหน้าปั่น (cover) คั่นกลาง
+  const slips=[];
+  orderedUnits.forEach(unit=>{
+    const list=soldiers.filter(s=>s.unit===unit);
+    if(!list.length)return;
+    // หน้าปกกองร้อย
+    slips.push(`<div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:180mm;flex-direction:column;text-align:center;border:2px solid #333;padding:20mm;">
+      <div style="font-size:22pt;font-weight:700;margin-bottom:12px;">ใบจ่ายเงินเดือนทหารกองประจำการ</div>
+      <div style="font-size:18pt;margin-bottom:8px;">เดือน${cfg.month} ${cfg.year}</div>
+      <div style="font-size:20pt;font-weight:700;color:#1a4f8a;margin-top:16px;">${unit}</div>
+      <div style="font-size:14pt;margin-top:8px;color:#555;">${list.length} นาย</div>
+    </div>`);
+    list.forEach((s,i)=>slips.push(buildSlip(s,i+1,cfg)));
+  });
+  openPrint(slips);
+}
+
+function exportSalaryExcel(){
+  const cfg = getCfg();
+  const list = getFiltered();
+  if(!list.length){ alert('ไม่มีข้อมูล'); return; }
+  const wb = XLSX.utils.book_new();
+  // header
+  const header = ['เลขประจำตัวประชาชน','ชื่อ','นามสกุล','หน่วย','ระดับ/ขั้น','เงินเดือน','พชค.','ยอดเบิก (เงินเดือน+พชค.)','ยอดหัก','ยอดรับสุทธิ'];
+  const rows = list.map(s=>{
+    const income = s.salary + s.phck;
+    const net    = calcNet(s, cfg);
+    return [s.id, s.fname, s.lname, s.unit, s.level, s.salary, s.phck, income, s.deduct, net];
+  });
+  // row รวม
+  const totIncome = list.reduce((a,s)=>a+s.salary+s.phck, 0);
+  const totDeduct = list.reduce((a,s)=>a+s.deduct, 0);
+  const totNet    = list.reduce((a,s)=>a+calcNet(s,cfg), 0);
+  const totSal    = list.reduce((a,s)=>a+s.salary, 0);
+  const totPhck   = list.reduce((a,s)=>a+s.phck, 0);
+  rows.push(['','รวมทั้งหมด ('+list.length+' คน)','','','',totSal,totPhck,totIncome,totDeduct,totNet]);
+
+  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+  // column widths
+  ws['!cols'] = [{wch:18},{wch:14},{wch:16},{wch:14},{wch:10},{wch:10},{wch:10},{wch:16},{wch:10},{wch:12}];
+  const md = monthsData[activeYYYYMM];
+  const sheetName = (md?md.label:'เงินเดือน').slice(0,31);
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  XLSX.writeFile(wb, 'เงินเดือน_'+(md?md.label:'export')+'.xlsx');
+}
+
+function printAll(){
+  const list=getFiltered(), cfg=getCfg();
+  openPrint(list.map(s=>buildSlip(s,s.no,cfg)));
+}
+function openPrint(slips){
+  const w=window.open('','_blank');
+  if(!w){ alert('กรุณาอนุญาต Popup สำหรับเว็บนี้ แล้วลองใหม่'); return; }
+  w.document.write(`<!DOCTYPE html><html lang="th"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+@font-face {
+  font-family: 'TH Sarabun PSK';
+  src: url('https://db.onlinewebfonts.com/t/34b4b2b921f3f8a8b85a5c35d23f8e22.woff2') format('woff2'),
+       url('https://db.onlinewebfonts.com/t/34b4b2b921f3f8a8b85a5c35d23f8e22.woff') format('woff');
+}
+</style>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'TH Sarabun PSK','Sarabun',sans-serif;background:#fff;}
+.slip-page{padding:8mm 10mm;page-break-after:always;}
+.slip-page:last-child{page-break-after:auto;}
+.slip-outer{max-width:170mm;margin:0 auto;}
+.slip{width:100%;border-collapse:collapse;border:1.5px solid #333;font-size:13px;}
+.slip td,.slip th{border:1px solid #666;padding:4px 8px;vertical-align:middle;}
+.hdr-th{background:#e0e0e0;font-weight:700;text-align:center;font-size:12px;}
+.section-td{background:#f0f0ec;font-weight:700;font-size:13px;padding:4px 8px;}
+.sub-td{background:#f8f8f5;font-size:11px;text-align:center;color:#333;padding:3px 6px;}
+.data-td{text-align:right;padding:4px 10px;}
+.data-center{text-align:center;padding:4px 8px;}
+@media print{body{margin:0;}.slip-page{padding:5mm 8mm;}}
+</style></head><body>
+${slips.map(s=>`<div class="slip-page">${s}</div>`).join('')}
+<script>window.onload=function(){setTimeout(()=>window.print(),600);}<\/script>
+</body></html>`);
+  w.document.close();
+}
+
+/* ===== ALLOWANCE (เบี้ยเลี้ยง) SYSTEM ===== */
+let biaData = {}; // { yyyymm: { period: { soldierNo: {days, deductDays, extra} } } }
+let currentBiaSoldiers = [];
+
+const STYLE_TAB_ACTIVE='padding:10px 24px;font-family:"TH Sarabun PSK","Sarabun",sans-serif;font-size:15px;border:none;cursor:pointer;background:#185FA5;color:#fff;font-weight:700;border-bottom:3px solid #fff;';
+const STYLE_TAB_INACTIVE='padding:10px 24px;font-family:"TH Sarabun PSK","Sarabun",sans-serif;font-size:15px;border:none;cursor:pointer;background:transparent;color:rgba(255,255,255,.7);font-weight:400;border-bottom:3px solid transparent;';
+
+function goHome(){
+  const lp=document.getElementById('landingPage');
+  const salary=document.getElementById('salarySection');
+  const bia=document.getElementById('biaSection');
+  const tb=document.getElementById('tabBar');
+  if(lp) lp.style.display='block';
+  if(salary) salary.style.display='none';
+  if(bia) bia.style.display='none';
+  if(tb) tb.style.display='none';
+}
+
+function switchTab(tab){
+  const lp     = document.getElementById('landingPage');
+  const salary = document.getElementById('salarySection');
+  const bia    = document.getElementById('biaSection');
+  const tS     = document.getElementById('tabSalary');
+  const tB     = document.getElementById('tabBia');
+  const tb     = document.getElementById('tabBar');
+  if(!salary||!bia||!tS||!tB) return;
+  // ซ่อน landing
+  if(lp) lp.style.display='none';
+  if(tb) tb.style.display='block';
+  if(tab==='salary'){
+    salary.style.display='block';
+    bia.style.display='none';
+    tS.style.cssText=STYLE_TAB_ACTIVE;
+    tB.style.cssText=STYLE_TAB_INACTIVE;
+    // โชว์ mainUI ถ้ามีข้อมูล หรือ importPanel ถ้าไม่มี
+    const mu=document.getElementById('mainUI');
+    const ip=document.getElementById('importPanel');
+    if(soldiers.length>0){
+      if(mu) mu.style.display='block';
+      if(ip) ip.style.display='none';
+      render();
+      renderSummaryInline();
+      renderMonthSelect();
+    } else {
+      if(ip) ip.style.display='block';
+      if(mu) mu.style.display='none';
+    }
+  } else {
+    salary.style.display='none';
+    bia.style.display='block';
+    tB.style.cssText=STYLE_TAB_ACTIVE;
+    tS.style.cssText=STYLE_TAB_INACTIVE;
+    updateBiaMonthList();
+    const mSel=document.getElementById('biaMonthSel');
+    if(mSel&&!mSel.value&&activeYYYYMM) mSel.value=activeYYYYMM;
+    const pSel=document.getElementById('biaPeriodSel');
+    const pv=(pSel&&pSel.value)||'1';
+    const daysEl=document.getElementById('biaDaysDefault');
+    if(daysEl) daysEl.value=getDefaultDays(pv);
+    loadBiaData();
+  }
+}
+
+function getDefaultDays(p){
+  if(p!=='3') return 10;
+  // คำนวณวันงวด 3 ตามเดือนจริง
+  const ym=(document.getElementById('biaMonthSel')&&document.getElementById('biaMonthSel').value)||activeYYYYMM||'';
+  const mon=ym?parseInt(ym.slice(-2)):0;
+  const yrCE=ym?parseInt(ym.slice(0,-2))-543:2024;
+  const lastDay=mon>0?new Date(yrCE,mon,0).getDate():31;
+  return lastDay-20;
+}
+
+function onPeriodChange(){
+  const p=document.getElementById('biaPeriodSel').value;
+  const dEl=document.getElementById('biaDaysDefault');
+  if(dEl) dEl.value=getDefaultDays(p);
+  loadBiaData();
+}
+
+function updateBiaMonthList(){
+  const sel = document.getElementById('biaMonthSel');
+  const cur = sel.value;
+  sel.innerHTML='<option value="">— เลือกเดือน —</option>';
+  Object.keys(monthsData).sort().forEach(ym=>{
+    const opt=document.createElement('option');
+    opt.value=ym; opt.textContent=monthsData[ym].label;
+    if(ym===cur||(!cur&&ym===activeYYYYMM)) opt.selected=true;
+    sel.appendChild(opt);
+  });
+}
+
+function getBiaKey(){
+  const ym=(document.getElementById('biaMonthSel')&&document.getElementById('biaMonthSel').value)||activeYYYYMM||Object.keys(monthsData).sort().pop()||'';
+  const p=(document.getElementById('biaPeriodSel')&&document.getElementById('biaPeriodSel').value)||'1';
+  return {ym,p};
+}
+
+function getBiaSoldierData(sid, ym, p){
+  // ใช้ id (เลขบัตร) เป็น key แทน no เพื่อความถูกต้องเมื่อ import/เรียงใหม่
+  if(!biaData[ym]) biaData[ym]={};
+  if(!biaData[ym][p]) biaData[ym][p]={};
+  if(!biaData[ym][p][sid]){
+    let defDays=10;
+    if(p==='3'){
+      const mon=ym?parseInt(ym.slice(-2)):0;
+      const yrCE=ym?parseInt(ym.slice(0,-2))-543:2024;
+      const lastDay=mon>0?new Date(yrCE,mon,0).getDate():31;
+      defDays=lastDay-20;
+    }
+    biaData[ym][p][sid]={days:defDays, deductDays:defDays, extra:0};
+  }
+  return biaData[ym][p][sid];
+}
+
+function applyDefaultDays(){
+  const {ym,p}=getBiaKey();
+  const defDays=parseInt(document.getElementById('biaDaysDefault').value)||10;
+  if(!biaData[ym]) biaData[ym]={};
+  if(!biaData[ym][p]) biaData[ym][p]={};
+  currentBiaSoldiers.forEach(s=>{
+    if(!biaData[ym][p][s.id]) biaData[ym][p][s.id]={};
+    biaData[ym][p][s.id].days=defDays;
+    biaData[ym][p][s.id].deductDays=defDays;
+    biaData[ym][p][s.id].extra=biaData[ym][p][s.id].extra||0;
+  });
+  loadBiaData();
+}
+
+function recalcBia(){ loadBiaData(); }
+
+function safeGet(id){ return document.getElementById(id); }
+
+function loadBiaData(){
+  const {ym,p}=getBiaKey();
+  const finalYm = ym || activeYYYYMM;
+  if(!finalYm||!monthsData[finalYm]){
+    document.getElementById('biaBody').innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:#888;">ไม่มีข้อมูล — กรุณา Import Excel เดือนเงินเดือนก่อน</td></tr>';
+    return;
+  }
+  // override ym
+  if(!ym&&document.getElementById('biaMonthSel')){
+    document.getElementById('biaMonthSel').value=finalYm;
+  }
+  const soldiers_list = (monthsData[finalYm]||{soldiers:[]}).soldiers;
+  const UNIT_ORDER=['ร้อย.บก.','ร้อย.1','ร้อย.2','ร้อย.คม.','ทหารใหม่'];
+  // อัพเดท dropdown กองร้อย
+  const biaUF=document.getElementById('biaUnitFilter');
+  if(biaUF){
+    const curUnit=biaUF.value||'all';
+    const allBiaUnits=[...new Set(soldiers_list.map(s=>s.unit))];
+    biaUF.innerHTML='<option value="all">— ทั้งหมด —</option>';
+    UNIT_ORDER.filter(u=>allBiaUnits.includes(u)).forEach(u=>{
+      const opt=document.createElement('option');
+      opt.value=u; opt.textContent=u;
+      if(u===curUnit) opt.selected=true;
+      biaUF.appendChild(opt);
+    });
+  }
+  const biaUnitSel=(biaUF&&biaUF.value!=='all')?biaUF.value:null;
+  const filtered_bia = biaUnitSel
+    ? soldiers_list.filter(s=>s.unit===biaUnitSel)
+    : soldiers_list;
+  currentBiaSoldiers = [...filtered_bia].sort((a,b)=>{
+    const ai=UNIT_ORDER.indexOf(a.unit), bi=UNIT_ORDER.indexOf(b.unit);
+    return ai-bi || a.no-b.no;
+  });
+  const rateEl=document.getElementById('biaRate');
+  const deductRateEl=document.getElementById('biaDeductRate');
+  const tbody=document.getElementById('biaBody');
+  const rate=rateEl?parseFloat(rateEl.value)||96:96;
+  const deductRate=deductRateEl?parseFloat(deductRateEl.value)||70:70;
+  tbody.innerHTML='';
+  let totEarn=0, totFood=0, totExtra=0, totTransfer=0;
+  currentBiaSoldiers.forEach((s,i)=>{
+    const d=getBiaSoldierData(s.id,finalYm,p);
+    const earn=rate*d.days;
+    const foodDeduct=deductRate*d.deductDays;
+    const extra=d.extra||0;
+    const transfer=earn-foodDeduct-extra;
+    totEarn+=earn; totFood+=foodDeduct; totExtra+=extra; totTransfer+=transfer;
+    const tr=document.createElement('tr');
+    tr.style.borderBottom='1px solid #eee';
+    tr.innerHTML=`
+      <td style="padding:7px 10px;">${i+1}</td>
+      <td style="padding:7px 10px;white-space:nowrap;"><strong>พลฯ ${s.fname}</strong> ${s.lname}</td>
+      <td style="padding:7px 10px;"><span style="font-size:11px;padding:2px 7px;border-radius:20px;background:#ddeaf7;color:#0d3d73;">${s.unit}</span></td>
+      <td style="padding:7px 4px;text-align:center;">
+        <input type="number" value="${d.days}" min="0" max="31" style="width:56px;padding:4px 6px;border:1px solid #ccc;border-radius:6px;text-align:center;font-size:13px;"
+          onchange="updateBia('${s.id}','days',this.value,'${finalYm}','${p}')">
+      </td>
+      <td style="padding:7px 10px;text-align:right;font-variant-numeric:tabular-nums;">${fmt(earn)}</td>
+      <td style="padding:7px 4px;text-align:center;">
+        <input type="number" value="${d.deductDays}" min="0" max="31" style="width:56px;padding:4px 6px;border:1px solid #ccc;border-radius:6px;text-align:center;font-size:13px;"
+          onchange="updateBia('${s.id}','deductDays',this.value,'${finalYm}','${p}')">
+      </td>
+      <td style="padding:7px 10px;text-align:right;font-variant-numeric:tabular-nums;color:#8b2000;">${fmt(foodDeduct)}</td>
+      <td style="padding:7px 4px;text-align:right;">
+        <input type="number" value="${extra}" min="0" style="width:76px;padding:4px 6px;border:1px solid #ccc;border-radius:6px;text-align:right;font-size:13px;"
+          onchange="updateBia('${s.id}','extra',this.value,'${finalYm}','${p}')">
+      </td>
+      <td style="padding:7px 10px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:#1a4f8a;">${fmt(transfer)}</td>`;
+    tbody.appendChild(tr);
+  });
+  // summary row
+  const tfoot=document.createElement('tr');
+  tfoot.style.cssText='background:#eef3fa;font-weight:700;border-top:2px solid #b3ccf0;';
+  tfoot.innerHTML=`
+    <td colspan="3" style="padding:8px 10px;">รวมทั้งหมด (${currentBiaSoldiers.length} คน)</td>
+    <td style="padding:8px 10px;text-align:center;">-</td>
+    <td style="padding:8px 10px;text-align:right;">${fmt(totEarn)}</td>
+    <td style="padding:8px 10px;text-align:center;">-</td>
+    <td style="padding:8px 10px;text-align:right;color:#8b2000;">${fmt(totFood)}</td>
+    <td style="padding:8px 10px;text-align:right;">${fmt(totExtra)}</td>
+    <td style="padding:8px 10px;text-align:right;color:#1a4f8a;">${fmt(totTransfer)}</td>`;
+  tbody.appendChild(tfoot);
+  const periodLabel=['','งวด 1 (1-10)','งวด 2 (11-20)','งวด 3 (21-สิ้นเดือน)'][p]||'งวด '+p;
+  // สรุปแยกกองร้อย
+  const byUnitSummary={};
+  currentBiaSoldiers.forEach(s=>{
+    const d=getBiaSoldierData(s.id,finalYm,p);
+    const earn2=rate*d.days, food2=deductRate*d.deductDays, extra2=d.extra||0;
+    if(!byUnitSummary[s.unit]) byUnitSummary[s.unit]={earn:0,food:0,extra:0,transfer:0,count:0};
+    byUnitSummary[s.unit].earn+=earn2;
+    byUnitSummary[s.unit].food+=food2;
+    byUnitSummary[s.unit].extra+=extra2;
+    byUnitSummary[s.unit].transfer+=(earn2-food2-extra2);
+    byUnitSummary[s.unit].count++;
+  });
+  const unitRows=UNIT_ORDER.filter(u=>byUnitSummary[u]).map(u=>{
+    const d2=byUnitSummary[u];
+    return `<tr style="border-bottom:1px solid #e0eaf5;">
+      <td style="padding:5px 10px;font-weight:600;">${u}</td>
+      <td style="padding:5px 10px;text-align:center;">${d2.count}</td>
+      <td style="padding:5px 10px;text-align:right;">${fmt(d2.earn)}</td>
+      <td style="padding:5px 10px;text-align:right;color:#8b2000;">${fmt(d2.food)}</td>
+      <td style="padding:5px 10px;text-align:right;color:#8b2000;">${fmt(d2.extra)}</td>
+      <td style="padding:5px 10px;text-align:right;font-weight:700;color:#1a4f8a;">${fmt(d2.transfer)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('biaSummary').innerHTML=`
+    <div style="width:100%;overflow-x:auto;">
+      <div style="margin-bottom:8px;font-weight:700;color:#1a4f8a;">${periodLabel} — ${currentBiaSoldiers.length} คน</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="background:#ddeaf7;">
+          <th style="padding:6px 10px;text-align:left;">กองร้อย</th>
+          <th style="padding:6px 10px;text-align:center;">จำนวน</th>
+          <th style="padding:6px 10px;text-align:right;">ยอดเบิก</th>
+          <th style="padding:6px 10px;text-align:right;">หักค่าประกอบ</th>
+          <th style="padding:6px 10px;text-align:right;">หักอื่นๆ</th>
+          <th style="padding:6px 10px;text-align:right;">โอนทหาร</th>
+        </tr></thead>
+        <tbody>${unitRows}
+          <tr style="background:#eef3fa;font-weight:700;border-top:2px solid #b3ccf0;">
+            <td style="padding:6px 10px;">รวม</td>
+            <td style="padding:6px 10px;text-align:center;">${currentBiaSoldiers.length}</td>
+            <td style="padding:6px 10px;text-align:right;">${fmt(totEarn)}</td>
+            <td style="padding:6px 10px;text-align:right;color:#8b2000;">${fmt(totFood)}</td>
+            <td style="padding:6px 10px;text-align:right;color:#8b2000;">${fmt(totExtra)}</td>
+            <td style="padding:6px 10px;text-align:right;color:#1a4f8a;">${fmt(totTransfer)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function updateBia(sid, field, val, ym, p){
+  if(!biaData[ym]) biaData[ym]={};
+  if(!biaData[ym][p]) biaData[ym][p]={};
+  if(!biaData[ym][p][sid]) biaData[ym][p][sid]={days:10,deductDays:10,extra:0};
+  biaData[ym][p][sid][field]=parseFloat(val)||0;
+  // recalc summary only (ไม่ re-render ทั้งตาราง เพื่อไม่เสีย focus)
+  const rate=parseFloat((document.getElementById('biaRate')||{value:96}).value)||96;
+  const deductRate=parseFloat((document.getElementById('biaDeductRate')||{value:70}).value)||70;
+  const {ym:cym,p:cp}=getBiaKey();
+  let totEarn=0,totFood=0,totExtra=0,totTransfer=0;
+  currentBiaSoldiers.forEach(s=>{
+    const d=getBiaSoldierData(s.id,cym,cp);
+    totEarn+=rate*d.days; totFood+=deductRate*d.deductDays; totExtra+=d.extra||0;
+    totTransfer+=(rate*d.days)-(deductRate*d.deductDays)-(d.extra||0);
+  });
+  const periodLabel=['','งวด 1 (1-10)','งวด 2 (11-20)','งวด 3 (21-31)'][cp];
+  document.getElementById('biaSummary').innerHTML=`
+    <div><small style="color:#666;display:block;font-size:11px;">งวด</small><strong>${periodLabel}</strong></div>
+    <div><small style="color:#666;display:block;font-size:11px;">ยอดเบิกรวม</small><strong>${fmt(totEarn)}</strong></div>
+    <div><small style="color:#666;display:block;font-size:11px;">หักค่าประกอบรวม</small><strong style="color:#8b2000;">${fmt(totFood)}</strong></div>
+    <div><small style="color:#666;display:block;font-size:11px;">หักอื่นๆรวม</small><strong style="color:#8b2000;">${fmt(totExtra)}</strong></div>
+    <div><small style="color:#666;display:block;font-size:11px;">โอนทหารรวม</small><strong style="color:#1a4f8a;">${fmt(totTransfer)}</strong></div>
+    <div><small style="color:#666;display:block;font-size:11px;">โอนค่าประกอบรวม</small><strong style="color:#3B6D11;">${fmt(totFood)}</strong></div>`;
+  // อัพเดท row นั้น
+  const rows=document.getElementById('biaBody').querySelectorAll('tr');
+  const idx=currentBiaSoldiers.findIndex(s=>s.id===sid);
+  if(idx>=0&&rows[idx]){
+    const d=biaData[ym][p][sid];
+    const earn=rate*d.days, food=deductRate*d.deductDays, extra2=d.extra||0;
+    const cells=rows[idx].querySelectorAll('td');
+    if(cells[4]) cells[4].textContent=fmt(earn);
+    if(cells[6]) cells[6].textContent=fmt(food);
+    if(cells[8]) cells[8].textContent=fmt(earn-food-extra2);
+  }
+}
+
+function exportBiaExcel(type){
+  const {ym,p}=getBiaKey();
+  if(!ym){ alert('กรุณาเลือกเดือน'); return; }
+  const rate=parseFloat(document.getElementById('biaRate').value)||96;
+  const deductRate=parseFloat(document.getElementById('biaDeductRate').value)||70;
+  const ym2=ym||activeYYYYMM; const md=monthsData[ym2];
+  const periodLabel=['','งวด1_1-10','งวด2_11-20','งวด3_21-31'][p];
+  const wb=XLSX.utils.book_new();
+  let rows=[], filename='';
+  if(type===1){
+    // โอนให้ทหาร
+    filename=`โอนทหาร_${md.label}_${periodLabel}.xlsx`;
+    currentBiaSoldiers.forEach(s=>{
+      const d=getBiaSoldierData(s.id,ym2,p);
+      const earn=rate*d.days, food=deductRate*d.deductDays, extra=d.extra||0;
+      const transfer=earn-food-extra;
+      if(transfer>0){
+        rows.push(['006', s.accountNo||s.id||'', s.accountName||(s.fname+' '+s.lname), transfer]);
+      }
+    });
+    const ws=XLSX.utils.aoa_to_sheet([['รหัสธนาคาร','เลขบัญชี','ชื่อบัญชี','ยอดเงิน'],...rows]);
+    ws['!cols']=[{wch:12},{wch:18},{wch:30},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws,'โอนทหาร');
+  } else {
+    // โอนค่าประกอบเลี้ยง
+    filename=`โอนคาประกอบ_${md.label}_${periodLabel}.xlsx`;
+    let totFood=0;
+    currentBiaSoldiers.forEach(s=>{
+      const d=getBiaSoldierData(s.id,ym2,p);
+      totFood+=deductRate*d.deductDays;
+    });
+    rows=[['006','7360587484','ค่าประกอบเลี้ยง พัน.ช.คมศ.พล.ช.',totFood]];
+    const ws=XLSX.utils.aoa_to_sheet([['รหัสธนาคาร','เลขบัญชี','ชื่อบัญชี','ยอดเงิน'],...rows]);
+    ws['!cols']=[{wch:12},{wch:18},{wch:35},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws,'โอนคาประกอบ');
+  }
+  XLSX.writeFile(wb, filename);
+}
+</script>
+</body>
+</html>
